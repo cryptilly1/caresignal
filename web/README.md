@@ -122,6 +122,23 @@ In Supabase Authentication URL Configuration, set the hosted Site URL and allow:
 - `https://caresignal-602.netlify.app/auth/callback?next=recovery`
 - `http://localhost:3000/auth/callback`
 - `http://localhost:3000/auth/callback?next=recovery`
+- `http://localhost:3001/auth/callback`
+- `http://localhost:3001/auth/callback?next=recovery`
+
+Keep both hosted and local entries: an unlisted `redirectTo` falls back to
+Supabase's Site URL. Set the Site URL to `https://caresignal-602.netlify.app`.
+For phone testing, also add the current tunnel's exact `/auth/callback` and
+`/auth/callback?next=recovery` URLs. The URL changes when a quick tunnel restarts.
+When a local reverse proxy exposes an internal localhost origin to Next.js,
+set `CARESIGNAL_PUBLIC_ORIGIN` to that tunnel's HTTPS origin in `.env.local`.
+The callback uses it only when a request host matches that configured host;
+ordinary localhost callbacks still return to localhost.
+
+Google/GitHub sign-in leaves the simulated phone iframe before navigating to
+the provider, since providers block embedded sign-in. Successful OAuth,
+email confirmation, and email/password sign-in continue to `/onboarding`;
+password recovery continues to the account password-update form. Failed
+callbacks show the account error screen rather than claiming a signed-in state.
 
 For Google and GitHub, use the Supabase project's `/auth/v1/callback` URL in the
 provider console, not the Netlify callback. Email confirmation and reset links

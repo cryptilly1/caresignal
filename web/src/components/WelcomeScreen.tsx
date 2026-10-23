@@ -42,8 +42,15 @@ export function WelcomeScreen() {
       if (!settings.ok) throw new Error("Sign-in providers could not be loaded. Please try again.");
       const config = await settings.json() as { external?: Record<string, boolean> };
       if (!config.external?.[provider]) throw new Error(`${provider === "github" ? "GitHub" : "Google"} sign-in is not enabled in Supabase yet.`);
-      const { error } = await supabaseBrowser().auth.signInWithOAuth({ provider, options: { redirectTo: accountCallback() } });
+      const { data, error } = await supabaseBrowser().auth.signInWithOAuth({
+        provider,
+        options: { redirectTo: accountCallback(), skipBrowserRedirect: true },
+      });
       if (error) throw error;
+      if (!data.url) throw new Error("The sign-in provider did not return an authorization link. Please try again.");
+      const inMobilePreview = window.name === "caresignal-mobile-preview" &&
+        window.frameElement?.getAttribute("name") === "caresignal-mobile-preview";
+      (inMobilePreview ? window.parent : window).location.assign(data.url);
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : "Provider sign-in could not start.");
       setBusy(false);
@@ -64,7 +71,7 @@ export function WelcomeScreen() {
         ? await client.auth.signUp({ email, password, options: { emailRedirectTo: accountCallback() } })
         : await client.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      if (data.session) router.push("/account");
+      if (data.session) router.push("/onboarding");
       else {
         form.reset();
         setNotice("Check your email to confirm your account. If you already have an account, sign in instead. Open the confirmation link in this browser.");
