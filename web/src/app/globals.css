@@ -6574,6 +6574,17 @@ button.care-chip::after,
   opacity: 0.65;
 }
 
+.welcome-screen .welcome-screen__auth-progress {
+  bottom: 310px;
+  justify-content: center;
+}
+
+.welcome-screen .account-sheet__auth-progress {
+  position: static;
+  justify-content: center;
+  margin: 0 0 16px;
+}
+
 .receiver-setup-day__greeting p {
   margin: 0 0 10px;
   color: #536b80;

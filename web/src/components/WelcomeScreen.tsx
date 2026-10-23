@@ -26,6 +26,7 @@ export function WelcomeScreen() {
   const [notice, setNotice] = useState("");
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [busy, setBusy] = useState(false);
+  const [googlePending, setGooglePending] = useState(false);
   const [authError, setAuthError] = useState("");
 
   useEffect(() => {
@@ -37,6 +38,7 @@ export function WelcomeScreen() {
   async function signInWithGoogle() {
     if (busy) return;
     setBusy(true); setNotice(""); setAuthError("");
+    setGooglePending(true);
     try {
       const settings = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/settings`, {
         headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "" },
@@ -55,6 +57,7 @@ export function WelcomeScreen() {
       (inMobilePreview ? window.parent : window).location.assign(data.url);
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : "Provider sign-in could not start.");
+      setGooglePending(false);
       setBusy(false);
     }
   }
@@ -189,9 +192,11 @@ export function WelcomeScreen() {
         </p>
       )}
       {authError && !showEmailSheet && <p className="welcome-screen__notice" role="alert">{authError}</p>}
+      {googlePending && !showEmailSheet && <p className="onboarding-message welcome-screen__auth-progress" role="status">Signing in to Google...</p>}
 
       {showEmailSheet && (
         <BottomDrawer title={mode === "signup" ? "Create your account" : "Welcome back"} onClose={() => setShowEmailSheet(false)}>
+            {googlePending && <p className="onboarding-message account-sheet__auth-progress" role="status">Signing in to Google...</p>}
             {notice && (
               <p className="account-sheet__notice" role="status">
                 {notice}
