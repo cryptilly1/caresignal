@@ -203,7 +203,7 @@ export function SettingsScreens() {
   const intro = section === "settings";
   const backSection: Section = section === "cover" ? "rota" : section === "permissions" || section === "connect" ? "ring" : "settings";
 
-  return <main className={`onboarding-screen care-home caregiver-home settings-screen ${inter.variable} ${jakarta.variable}`}>
+  return <main className={`onboarding-screen care-home caregiver-home settings-screen${section === "connect" ? " settings-screen--connect" : ""} ${inter.variable} ${jakarta.variable}`}>
     <StatusBar />
     <CareHomeHeader accountIcon centered back={intro ? undefined : { href: href(backSection), label: sectionTitles[backSection] }} initials="" onAccount={() => setDrawer({ title: "Your account", content: <AccountNotice /> })} />
     <div className="onboarding-body caregiver-home__body settings-body" ref={bodyRef}>
@@ -294,7 +294,7 @@ export function SettingsScreens() {
       </div>
     </div>
     <CareHomeFooter active="settings" />
-    {drawer && <BottomDrawer title={drawer.title} onClose={() => setDrawer(null)}>{drawer.content}</BottomDrawer>}
+    {drawer && <BottomDrawer title={drawer.title} wide={drawer.title === "Ring live view"} onClose={() => setDrawer(null)}>{drawer.content}</BottomDrawer>}
     {message && !drawer && <div className="onboarding-message" role="status"><span>{message}</span><button aria-label="Dismiss message" className="care-message-dismiss" onClick={() => setMessage("")} type="button"><X aria-hidden="true" size={18} strokeWidth={2} /></button></div>}
   </main>;
 }

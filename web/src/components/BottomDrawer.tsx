@@ -25,11 +25,12 @@ export function DrawerOption({ label, description, avatar, selected, onClick }: 
 }
 
 export function BottomDrawer({
-  title, onClose, children,
+  title, onClose, children, wide = false,
 }: {
   title: string;
   onClose: () => void;
   children: ReactNode;
+  wide?: boolean;
 }) {
   const anchorRef = useRef<HTMLSpanElement>(null);
   const panelRef = useRef<HTMLElement>(null);
@@ -97,7 +98,7 @@ export function BottomDrawer({
         <div className="account-sheet__backdrop choice-drawer-backdrop" onClick={(event) => {
           if (event.target === event.currentTarget) onClose();
         }}>
-          <section aria-labelledby={titleId} aria-modal="true" className="account-sheet choice-drawer" ref={panelRef} role="dialog">
+          <section aria-labelledby={titleId} aria-modal="true" className={`account-sheet choice-drawer${wide ? " choice-drawer--wide" : ""}`} ref={panelRef} role="dialog">
             <span className="choice-drawer__handle" aria-hidden="true" />
             <header className="account-sheet__header">
               <h2 id={titleId}>{title}</h2>

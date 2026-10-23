@@ -57,6 +57,15 @@ it does not change household authorization. The website has separate entry
 points for the care circle, receiver, DoorSense, camera, voice, and audio tools.
 Web mode spans the browser width; its welcome screen fills the space below the
 viewport toolbar. The old centered phone shell remains confined to mobile preview.
+The website's compact "How it works" previews crop actual 390px app captures into
+minimal neutral frames, stored under `public/images/product/`. DoorSense adds an
+explicitly illustrative motion banner and response modal over the receiver
+capture. These show example household information, not live monitoring; no camera
+is opened for these assets. Experience links use the shared glass button style.
+
+Connect Ring uses full-width stacked cards on desktop instead of the general
+settings grid. Camera setup and Ring live-view drawers expand to 680px on wide
+screens while retaining the standard narrow drawer on phones.
 
 **Connect camera dummy** opens the shared camera setup drawer, also available
 in Settings → Ring account / Connect Ring and DoorSense camera settings.

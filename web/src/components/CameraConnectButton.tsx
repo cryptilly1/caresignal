@@ -12,7 +12,7 @@ export function CameraConnectButton({ className = "cs-button cs-button--glass", 
   const [open, setOpen] = useState(false);
   return <>
     <button type="button" className={className} onClick={() => setOpen(true)} aria-haspopup="dialog">{children}<QrCode size={18} /></button>
-    {open && <BottomDrawer title="Connect a camera" onClose={() => setOpen(false)}><CameraConnectionOptions /></BottomDrawer>}
+    {open && <BottomDrawer title="Connect a camera" wide onClose={() => setOpen(false)}><CameraConnectionOptions /></BottomDrawer>}
   </>;
 }
 

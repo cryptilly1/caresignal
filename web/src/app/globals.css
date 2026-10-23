@@ -5630,6 +5630,11 @@ button.care-chip::after,
 }
 
 @media (min-width: 900px) {
+  .settings-screen--connect .settings-stack {
+    display: flex;
+    align-items: stretch;
+  }
+
   .settings-stack {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -5639,6 +5644,13 @@ button.care-chip::after,
   .settings-stack > .settings-notice,
   .settings-stack > .settings-connection-art {
     grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 761px) {
+  .choice-drawer.account-sheet.choice-drawer--wide {
+    width: min(680px, calc(100% - 48px));
+    padding: 20px 28px 28px;
   }
 }
 

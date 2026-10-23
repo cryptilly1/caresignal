@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowDown, ArrowUpRight, AudioLines, Camera, DoorOpen, Heart, ShieldCheck } from "lucide-react";
+import { ArrowDown, ArrowUpRight, AudioLines, BellRing, Camera, Check, DoorOpen, Heart, ShieldCheck } from "lucide-react";
 import { CameraConnectButton } from "./CameraConnectButton";
 
 const experiences = [
@@ -51,12 +51,17 @@ export function ProductWebsite() {
           <p>Care isn&apos;t only the big moments. It&apos;s knowing someone has checked in. Remembering a routine. Having a familiar person to turn to when the doorbell rings.</p>
           <p>CareSignal brings those moments into one shared space, with a simpler experience for the person at home and a clearer picture for their care circle.</p>
         </div>
-        <div className="product-steps"><div><span>01</span><h3>Stay in the rhythm.</h3><p>Check-ins and daily reminders keep the everyday things close.</p></div><div><span>02</span><h3>Know who&apos;s there.</h3><p>DoorSense gives the person at home a clear way to respond.</p></div><div><span>03</span><h3>Share the next step.</h3><p>Caregivers can coordinate tasks, duty, and follow-through.</p></div></div>
+        <div className="product-steps">
+          <div><span>01</span><h3>Stay in the rhythm.</h3><p>Check-ins and daily reminders keep the everyday things close.</p><MobileScreen name="receiver-home" alt="CareSignal receiver home with daily check-in, mood, voice, and reminder cards" /></div>
+          <div><span>02</span><h3>Know who&apos;s there.</h3><p>DoorSense gives the person at home a clear way to respond.</p><MobileScreen name="doorsense-alert" alt="Illustrative DoorSense motion alert above a response modal with visitor and caregiver choices" /></div>
+          <div><span>03</span><h3>Share the next step.</h3><p>Caregivers can coordinate tasks, duty, and follow-through.</p><MobileScreen name="caregiver-home" alt="Caregiver home showing Elias on duty, backup coverage, and care alerts" /></div>
+        </div>
+        <p className="product-screens-note">App screenshots and an illustrative DoorSense alert. Example household and activity.</p>
       </section>
 
       <section className="product-experiences" id="experiences">
         <div className="product-section"><p className="product-eyebrow">One product. Different ways to connect.</p><h2>Make yourself at home.</h2><p className="product-section__intro">Explore the app, or open a dedicated experience.</p>
-          <div className="product-experience-grid">{experiences.map(({ name, description, href, action, icon: Icon, tag }) => <article className="product-experience" key={href}><div className="product-experience__top"><Icon size={27} strokeWidth={1.5} /><span>{tag}</span></div><h3>{name}</h3><p>{description}</p>{href === "/cam" ? <CameraConnectButton className="product-camera-trigger">Connect camera dummy</CameraConnectButton> : <Link href={href}>{action}<ArrowUpRight size={18} /></Link>}</article>)}</div>
+          <div className="product-experience-grid">{experiences.map(({ name, description, href, action, icon: Icon, tag }) => <article className="product-experience" key={href}><div className="product-experience__top"><Icon size={27} strokeWidth={1.5} /><span>{tag}</span></div><h3>{name}</h3><p>{description}</p>{href === "/cam" ? <CameraConnectButton className="cs-button cs-button--glass product-experience__button">Connect camera dummy</CameraConnectButton> : <Link className="cs-button cs-button--glass product-experience__button" href={href}>{action}<ArrowUpRight size={18} /></Link>}</article>)}</div>
           <p className="product-experience-note">The caregiver demo uses example information. Device and voice tools are prototype experiences; household access may be required. The phone camera and browser voice tools are stand-ins, not a Ring camera or Echo device.</p>
         </div>
       </section>
@@ -65,4 +70,23 @@ export function ProductWebsite() {
       <footer className="product-footer"><Link href="/" className="product-brand"><Heart size={18} />CareSignal</Link><p>Made for everyday care.</p><Link href="/welcome">Open app <ArrowUpRight size={15} /></Link></footer>
     </main>
   );
+}
+
+function MobileScreen({ name, alt }: { name: string; alt: string }) {
+  return <figure className={`product-mobile product-mobile--${name}`}>
+    <div className="product-mobile__frame">
+      <Image src={`/images/product/${name === "doorsense-alert" ? "receiver-home" : name}.png`} alt={name === "doorsense-alert" ? "" : alt} width={780} height={1688} sizes="(max-width: 760px) 280px, 310px" />
+      {name === "doorsense-alert" && <div className="product-door-example" role="img" aria-label={alt}>
+        <div className="product-door-example__alert"><span className="product-door-example__bell"><BellRing size={18} /></span><div><strong>Motion detected</strong><small>Front door · just now</small></div><span className="product-door-example__badge">Door alert</span></div>
+        <div className="product-door-example__modal">
+          <span className="product-door-example__handle" />
+          <div className="product-door-example__heading"><DoorOpen size={19} /><strong>Someone is at the door</strong></div>
+          <p>What would you like to do?</p>
+          <span className="cs-button cs-button--glass"><Check size={14} />I&apos;m expecting someone</span>
+          <span className="cs-button cs-button--primary"><Heart size={14} />Tell my caregiver</span>
+          <span className="product-door-example__help"><BellRing size={13} />I need help</span>
+        </div>
+      </div>}
+    </div>
+  </figure>;
 }
