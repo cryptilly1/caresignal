@@ -409,6 +409,7 @@ a {
   font-size: 1rem;
   font-weight: 600;
   letter-spacing: -0.01em;
+  white-space: nowrap;
   transition:
     filter 150ms ease,
     transform 150ms ease;
@@ -416,6 +417,10 @@ a {
 
 .cs-button:hover {
   filter: brightness(1.06);
+}
+
+.cs-button > svg {
+  flex-shrink: 0;
 }
 
 .cs-button:active {
@@ -843,11 +848,17 @@ a {
   outline-offset: 3px;
 }
 
+.choice-drawer-backdrop {
+  position: fixed;
+  z-index: 30;
+  background: rgba(220, 234, 247, 0.62);
+  -webkit-backdrop-filter: blur(10px) saturate(0.9);
+  backdrop-filter: blur(10px) saturate(0.9);
+}
+
 .onboarding-screen > .choice-drawer-backdrop {
   position: absolute;
   z-index: 10;
-  background: rgba(0, 19, 29, 0.3);
-  backdrop-filter: blur(4px);
 }
 
 .choice-drawer.account-sheet {
@@ -855,6 +866,14 @@ a {
   max-height: calc(100% - 24px);
   padding-top: 12px;
   animation: choice-drawer-enter 180ms ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 18px 64px rgba(24, 61, 91, 0.18);
+}
+
+.choice-drawer .account-sheet__close {
+  width: 44px;
+  height: 44px;
+  flex-basis: 44px;
 }
 
 .choice-drawer__handle {
@@ -2819,6 +2838,7 @@ button.care-chip::after,
 .home-alert__actions,
 .door-help-panel__actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
@@ -2840,8 +2860,8 @@ button.care-chip::after,
 }
 
 .home-alert__actions > .cs-button--primary {
-  min-width: 0;
-  flex: 1;
+  min-width: max-content;
+  flex: 1 0 auto;
 }
 
 .home-alert__clear {
@@ -5526,12 +5546,13 @@ button.care-chip::after,
 
 .care-task-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
 .care-task-actions > .cs-button {
-  min-width: 0;
-  flex: 1;
+  min-width: max-content;
+  flex: 1 0 auto;
 }
 
 .care-task-cancel {
@@ -5648,9 +5669,40 @@ button.care-chip::after,
 }
 
 @media (min-width: 761px) {
+  .choice-drawer-backdrop {
+    align-items: center;
+    padding: 24px;
+  }
+
+  .choice-drawer.account-sheet {
+    max-height: calc(100% - 48px);
+  }
+
+  .choice-drawer__handle {
+    display: none;
+  }
+
   .choice-drawer.account-sheet.choice-drawer--wide {
     width: min(680px, calc(100% - 48px));
+    max-width: none;
     padding: 20px 28px 28px;
+  }
+}
+
+@media (max-width: 760px) {
+  .choice-drawer-backdrop {
+    padding: 12px 8px max(8px, env(safe-area-inset-bottom));
+  }
+
+  .choice-drawer.account-sheet {
+    max-height: calc(100% - 12px);
+    border-radius: 28px;
+    padding: 12px 18px 20px;
+  }
+
+  .choice-drawer .account-sheet__header h2 {
+    min-width: 0;
+    font-size: 20px;
   }
 }
 
@@ -5772,8 +5824,9 @@ button.care-chip::after,
 }
 
 .care-dialog::backdrop {
-  background: rgba(0, 19, 29, 0.45);
-  backdrop-filter: blur(5px);
+  background: rgba(220, 234, 247, 0.62);
+  -webkit-backdrop-filter: blur(10px) saturate(0.9);
+  backdrop-filter: blur(10px) saturate(0.9);
 }
 
 .care-dialog > p {
@@ -6169,9 +6222,20 @@ button.care-chip::after,
   padding: 24px 24px 140px;
 }
 
-.account-screen__body {
+.account-screen .account-screen__body {
+  display: flex;
+  flex-direction: column;
   gap: 24px;
-  padding: 32px 24px;
+  padding: 126px 24px max(32px, env(safe-area-inset-bottom));
+}
+
+.account-screen__body > * {
+  flex-shrink: 0;
+}
+
+.account-screen .receiver-setup-day__greeting h1 {
+  font-size: clamp(26px, 6.5vw, 32px);
+  line-height: 1.2;
 }
 
 .account-screen .care-card {

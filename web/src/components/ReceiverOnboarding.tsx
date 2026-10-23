@@ -9,7 +9,8 @@ import { useRouter } from "next/navigation";
 import { BottomDrawer } from "./BottomDrawer";
 import { CareHomeHeader } from "./CareHomeChrome";
 import { initials } from "@/lib/care-setup";
-import { BrandMark, StatusBar, inter, jakarta } from "./OnboardingFlow";
+import { StatusBar, inter, jakarta } from "./OnboardingFlow";
+import { BrandMark } from "./BrandMark";
 import {
   DEMO_INVITE_CODE,
   RECEIVER_SETUP_KEY,

@@ -2,10 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowDown, ArrowUpRight, AudioLines, BellRing, Camera, Check, DoorOpen, Heart, ShieldCheck } from "lucide-react";
 import { CameraConnectButton } from "./CameraConnectButton";
+import { BrandMark } from "./BrandMark";
 
 const experiences = [
-  { name: "The care circle.", description: "A shared picture of the day. Check-ins, reminders, and a clear next step for the person on duty.", href: "/care-circle?view=activity&demo=1", action: "Explore the caregiver demo", icon: Heart, tag: "Caregiver" },
-  { name: "A little reassurance.", description: "A simple daily space for checking in, keeping a routine, and asking for help.", href: "/recipient", action: "Open the receiver experience", icon: ShieldCheck, tag: "Receiver" },
+  { name: "The care circle.", description: "A shared picture of the day. Check-ins, reminders, and a clear next step for the person on duty.", href: "/care-circle?view=activity&demo=1", action: "Explore caregiver demo", icon: Heart, tag: "Caregiver" },
+  { name: "A little reassurance.", description: "A simple daily space for checking in, keeping a routine, and asking for help.", href: "/recipient", action: "Open receiver", icon: ShieldCheck, tag: "Receiver" },
   { name: "Meet DoorSense.", description: "A door event becomes a choice: expect a visitor, tell a caregiver, or ask for help.", href: "/doorsense", action: "Open DoorSense", icon: DoorOpen, tag: "At the door" },
   { name: "A view from the door.", description: "Use a phone as a motion-detection camera stand-in. Camera permission and a secure connection are required.", href: "/cam", action: "Open the camera viewfinder", icon: Camera, tag: "Camera test" },
   { name: "Just your voice.", description: "Try spoken check-ins and DoorSense phrases with the browser-based Alexa stand-in.", href: "/alexa", action: "Try voice check-ins", icon: AudioLines, tag: "Voice test" },
@@ -16,7 +17,7 @@ export function ProductWebsite() {
   return (
     <main className="product-site">
       <nav className="product-nav" aria-label="Website navigation">
-        <Link href="/" className="product-brand"><Heart size={21} strokeWidth={2.4} />CareSignal</Link>
+        <Link href="/" className="product-brand"><BrandMark />CareSignal</Link>
         <div className="product-nav__links"><a href="#how-it-works">How it works</a><a href="#experiences">Explore</a></div>
         <Link href="/welcome" className="product-link-button">Open app <ArrowUpRight size={15} /></Link>
       </nav>
@@ -29,7 +30,7 @@ export function ProductWebsite() {
         <div className="product-scene">
           <Image src="/images/welcome/quiet-landscape.png" alt="A warmly lit home and front porch at dusk" fill priority sizes="(max-width: 760px) 100vw, 1120px" className="product-scene__image" />
           <div className="product-device product-device--tablet">
-            <div className="product-device__bar"><span className="product-brand"><Heart size={16} />CareSignal</span><span>My day</span></div>
+            <div className="product-device__bar"><span className="product-brand"><BrandMark />CareSignal</span><span>My day</span></div>
             <p className="product-device__greeting">A good day starts<br />with a little hello.</p>
             <div className="product-checkin"><span className="product-symbol"><Heart size={24} /></span><div><strong>How are you today?</strong><p>A small check-in. A little peace of mind.</p></div><span className="product-demo-chip">I&apos;m okay</span></div>
             <div className="product-mini-grid"><div><span>My routine</span><strong>One thing at a time.</strong></div><div><span>My care circle</span><strong>Someone in your corner.</strong></div></div>
@@ -67,7 +68,7 @@ export function ProductWebsite() {
       </section>
 
       <section className="product-privacy product-section"><ShieldCheck size={38} strokeWidth={1.4} /><p className="product-eyebrow">Reassurance, with boundaries.</p><h2>Connection.<br />Not constant observation.</h2><p>DoorSense has a quiet state. An event can prompt a response, without an always-on receiver camera. Sharing has an end, and microphone controls stay within reach.</p><Link href="/welcome" className="product-button">Find your way in <ArrowUpRight size={18} /></Link></section>
-      <footer className="product-footer"><Link href="/" className="product-brand"><Heart size={18} />CareSignal</Link><p>Made for everyday care.</p><Link href="/welcome">Open app <ArrowUpRight size={15} /></Link></footer>
+      <footer className="product-footer"><Link href="/" className="product-brand"><BrandMark />CareSignal</Link><p>Made for everyday care.</p><Link href="/welcome">Open app <ArrowUpRight size={15} /></Link></footer>
     </main>
   );
 }

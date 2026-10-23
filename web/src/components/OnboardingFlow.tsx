@@ -1,5 +1,7 @@
 "use client";
 
+import { BrandMark } from "./BrandMark";
+
 import { X } from "lucide-react";
 
 import Image from "next/image";
@@ -55,22 +57,6 @@ export function StatusBar() {
   );
 }
 
-export function BrandMark({ centered = false }: { centered?: boolean }) {
-  return (
-    <div
-      className={`onboarding-brand-mark${centered ? " onboarding-brand-mark--centered" : ""}`}
-      aria-label="CareSignal"
-    >
-      <Image
-        src="/images/welcome/heart-pulse.svg"
-        width={24}
-        height={24}
-        alt=""
-        priority
-      />
-    </div>
-  );
-}
 
 function LockShieldIcon() {
   return (

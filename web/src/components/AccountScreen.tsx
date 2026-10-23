@@ -51,7 +51,7 @@ export function AccountScreen() {
   return <main className={`onboarding-screen care-home caregiver-home settings-screen account-screen ${inter.variable} ${jakarta.variable}`}>
     <CareHomeHeader centered back={{ href: "/", label: "welcome" }} initials={user?.email?.slice(0, 2).toUpperCase() ?? "CS"} />
     <div className="onboarding-body account-screen__body" aria-busy={loading || busy}>
-      <header className="receiver-setup-day__greeting"><h1>{loading ? "Checking your account" : user ? "You’re signed in." : "Your CareSignal account"}</h1></header>
+      <header className="receiver-setup-day__greeting"><h1>{loading ? "Checking your account" : user ? "You’re signed in." : "Your account"}</h1></header>
       {error && <p className="settings-error" role="alert">{error}</p>}
       {message && <p className="settings-notice" role="status">{message}</p>}
       {!loading && <section className="care-card">

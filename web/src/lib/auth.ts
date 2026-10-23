@@ -12,13 +12,26 @@ type AuthConfig = {
   error?: string;
 };
 
-function appAuthConfig(): AuthConfig {
+function isLocalDevelopmentRequest(request: Request): boolean {
+  if (process.env.NODE_ENV === "production") return false;
+  const loopbackHost = /^(localhost|127\.0\.0\.1|\[::1\])(?::\d{1,5})?$/i;
+  const host = request.headers.get("host");
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  return !!host && loopbackHost.test(host) &&
+    loopbackHost.test(new URL(request.url).host) &&
+    (!forwardedHost || loopbackHost.test(forwardedHost)) &&
+    !request.headers.has("forwarded") &&
+    !request.headers.has("cf-ray") &&
+    !request.headers.has("cf-connecting-ip");
+}
+
+function appAuthConfig(request?: Request): AuthConfig {
+  if (request && isLocalDevelopmentRequest(request)) {
+    return { password: null, configured: true, required: false };
+  }
   const password = process.env.CARESIGNAL_APP_PASSWORD?.trim() || null;
   if (password && password.length >= MIN_SECRET_LENGTH) {
     return { password, configured: true, required: true };
-  }
-  if (process.env.NODE_ENV !== "production" && !password) {
-    return { password: null, configured: true, required: false };
   }
   return {
     password: null,
@@ -51,7 +64,7 @@ function cookieValue(request: Request): string | null {
 }
 
 export function isCaregiverSessionValid(request: Request): boolean {
-  const config = appAuthConfig();
+  const config = appAuthConfig(request);
   if (!config.required) return true;
   if (!config.password) return false;
 
@@ -69,7 +82,7 @@ export function isCaregiverSessionValid(request: Request): boolean {
 }
 
 export function caregiverAuthStatus(request: Request) {
-  const config = appAuthConfig();
+  const config = appAuthConfig(request);
   return {
     authenticated: config.configured && isCaregiverSessionValid(request),
     required: config.required,
@@ -135,7 +148,7 @@ export function clearCaregiverSessionResponse() {
 }
 
 export function requireCaregiverSession(request: Request): NextResponse | null {
-  const config = appAuthConfig();
+  const config = appAuthConfig(request);
   if (!config.configured) {
     return NextResponse.json(
       { error: config.error ?? "Caregiver authentication is not configured." },
@@ -153,7 +166,7 @@ export function requireCaregiverSession(request: Request): NextResponse | null {
 
 export function requireMcpToken(request: Request): NextResponse | null {
   const token = process.env.CARESIGNAL_MCP_TOKEN?.trim();
-  if (!token && process.env.NODE_ENV !== "production") return null;
+  if (!token && isLocalDevelopmentRequest(request)) return null;
   if (!token || token.length < MIN_SECRET_LENGTH) {
     return NextResponse.json(
       {

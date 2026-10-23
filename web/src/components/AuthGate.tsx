@@ -2,6 +2,10 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { ArrowUpRight, LockKeyhole } from "lucide-react";
+import { BrandMark } from "./BrandMark";
+import { inter, jakarta } from "./OnboardingFlow";
 
 type AuthStatus = {
   authenticated: boolean;
@@ -75,8 +79,8 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
   if (!status) {
     return (
-      <main className="grid min-h-screen place-items-center bg-[#10251d] text-white">
-        <p className="text-sm text-white/65">Connecting to CareSignal…</p>
+      <main className={`access-screen ${inter.variable} ${jakarta.variable}`}>
+        <div className="access-loading" role="status"><BrandMark /><p>Opening your care circle...</p></div>
       </main>
     );
   }
@@ -86,22 +90,21 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <main className="grid min-h-screen place-items-center bg-[#10251d] px-5 py-10 text-white">
-      <section className="w-full max-w-sm rounded-[1.75rem] border border-white/15 bg-white/[0.08] p-7 shadow-2xl backdrop-blur-xl">
-        <p className="eyebrow text-[var(--accent-brand)]">CareSignal</p>
-        <h1 className="display mt-3 text-4xl">Caregiver access</h1>
-        <p className="mt-3 text-sm leading-relaxed text-white/65">
-          Enter the shared caregiver password to open this household.
-        </p>
-        {!status.configured ? (
-          <p role="alert" className="mt-6 rounded-xl bg-[#f4c46a]/10 p-4 text-sm text-[#f4c46a]">
-            {status.error ?? "Caregiver access has not been configured."}
-          </p>
-        ) : (
-          <form onSubmit={submit} className="mt-6 space-y-4">
-            <label className="block text-sm font-medium" htmlFor="caregiver-password">
-              Password
-            </label>
+    <main className={`access-screen ${inter.variable} ${jakarta.variable}`}>
+      <section className="access-card" aria-labelledby="access-heading">
+        <Link href="/" className="access-brand"><BrandMark /><span>CareSignal</span></Link>
+        <span className="access-icon" aria-hidden="true"><LockKeyhole size={26} /></span>
+        <div className="access-heading"><p className="access-eyebrow">A little closer. Even from afar.</p><h1 id="access-heading">Find your way in.</h1><p>Explore the demo or sign in to your account. Your care circle starts here.</p></div>
+        <div className="access-actions">
+          <Link className="cs-button cs-button--primary" href="/care-circle?view=activity&demo=1">Continue with demo <ArrowUpRight size={18} /></Link>
+          <Link className="cs-button cs-button--glass" href="/welcome">Sign in to your account</Link>
+        </div>
+        <p className="access-note">The demo uses example information and needs no password. Account sign-in does not yet grant live household access.</p>
+        <details className="access-operator">
+          <summary>{status.configured ? "Live household access" : "About this live household"}</summary>
+          <p>Live camera and household tools use separate operator access while household membership is being connected.</p>
+          {!status.configured ? <p className="access-notice" role="alert">{status.error ?? "Live household access has not been configured."}</p> : <form onSubmit={submit} className="access-form">
+            <label className="onboarding-field" htmlFor="caregiver-password"><span>Household password</span>
             <input
               id="caregiver-password"
               type="password"
@@ -109,22 +112,22 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               required
-              className="w-full rounded-xl border border-white/20 bg-black/20 px-4 py-3 text-white outline-none focus:border-[var(--accent-brand)]"
             />
+            </label>
             {error && (
-              <p role="alert" className="text-sm text-[#f4c46a]">
+              <p role="alert" className="access-error">
                 {error}
               </p>
             )}
             <button
               type="submit"
               disabled={submitting}
-              className="w-full rounded-xl bg-[var(--accent-brand)] px-4 py-3 font-semibold text-[#10251d] disabled:opacity-60"
+              className="cs-button cs-button--primary"
             >
-              {submitting ? "Signing in…" : "Continue"}
+              {submitting ? "Opening..." : "Open live household"}
             </button>
-          </form>
-        )}
+          </form>}
+        </details>
       </section>
     </main>
   );

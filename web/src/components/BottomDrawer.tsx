@@ -51,6 +51,8 @@ export function BottomDrawer({
     const panel = panelRef.current;
     if (!panel || !container) return;
     const previousFocus = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     const overlay = panel.parentElement;
     const siblings = [...container.children].filter(
       (node): node is HTMLElement => node instanceof HTMLElement && node !== overlay,
@@ -83,6 +85,7 @@ export function BottomDrawer({
     }
     panel.addEventListener("keydown", handleKey);
     return () => {
+      document.body.style.overflow = previousOverflow;
       siblings.forEach((node, index) => { node.inert = inertStates[index]; });
       panel.removeEventListener("keydown", handleKey);
       if (previousFocus instanceof HTMLElement && previousFocus.isConnected) {

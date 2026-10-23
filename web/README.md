@@ -7,7 +7,7 @@ Ring setup, and the multi-device demo flow, see the repository
 ## Run locally
 
 For Netlify, the repository-root `netlify.toml` builds the `web` application with
-Node 22 and uses Netlify's automatic Next.js adapter. Configure production
+Node 22 and explicitly enables Netlify's Next.js adapter. Configure production
 builds from `cryptilly1/caresignal` on its production branch,
 `cryptilly1-porchlight-continuation`. With `web` as the base directory, `.next`
 is the publish directory. Pushes to that branch trigger Netlify through the
@@ -45,15 +45,29 @@ Set `ALEXA_SKILL_ID` to the application ID from the Alexa developer console.
 Alexa Skill requests are validated against Amazon's certificate chain, raw-body
 signature, timestamp, and configured skill ID; the browser-based Alexa simulator
 uses the caregiver session.
-Without these variables, the local development app remains open, but the
-production API routes fail closed.
+Loopback development requests (`localhost`, `127.0.0.1`, or `[::1]`) open without
+a household password, even when one is configured for tunnel testing. This
+bypass is disabled in production and does not apply to forwarded or Cloudflare
+requests. Public tunnels require the configured household password; without it
+their household APIs fail closed. MCP's no-token development exception is also
+limited to direct loopback requests. Production API routes remain protected.
+The access screen uses the shared blue/glass design and offers a password-free
+demo and account sign-in before its separate live-household operator controls.
 
 ## Designed onboarding preview
 
 The public product website lives at `/`; **Open app** leads to `/welcome`.
-App routes include a Web/Mobile viewport switch. Mobile uses a 390px iframe
-with its own viewport so media queries and fixed controls behave as on a phone;
-it does not change household authorization. The website has separate entry
+Desktop app routes include a Web/Mobile viewport switch. Mobile simulates an
+iPhone 16 Pro using a 402 x 874 CSS-pixel iframe inside a device frame, so media
+queries and fixed controls behave as on a phone, without a Dynamic Island overlay.
+Use Hide to dismiss the preview toolbar and Show controls to restore it; the
+preference persists for the browser tab and keyboard focus follows the toggle.
+The website and preview toolbar reuse the app's heart-pulse logo.
+Viewports 760px and narrower
+render the responsive app directly, without a simulator, iframe, or preview
+toolbar, even if a desktop Mobile preference was saved. Resizing back restores
+the desktop preference. Neither mode changes household authorization.
+The website has separate entry
 points for the care circle, receiver, DoorSense, camera, voice, and audio tools.
 Web mode spans the browser width; its welcome screen fills the space below the
 viewport toolbar. The old centered phone shell remains confined to mobile preview.
@@ -66,13 +80,18 @@ is opened for these assets. Experience links use the shared glass button style.
 Connect Ring uses full-width stacked cards on desktop instead of the general
 settings grid. Camera setup and Ring live-view drawers expand to 680px on wide
 screens while retaining the standard narrow drawer on phones.
+Shared drawers use a light, blurred scrim, bottom-sheet placement on phones,
+and centered placement on desktop. Contents scroll without compressing form
+controls. The account page uses a spaced, non-shrinking column so notices,
+headings, and forms do not run together on short or narrow screens.
 
 **Connect camera dummy** opens the shared camera setup drawer, also available
 in Settings → Ring account / Connect Ring and DoorSense camera settings.
 QR codes are generated locally, contain only the supplied HTTPS origin plus
 `/cam`, and never include credentials. For local multi-device testing, enter
-an HTTPS tunnel address pointing at the same running server; localhost and the
-unpublished Netlify site are not usable phone links. The phone must pass the
+an HTTPS tunnel address pointing at the same running server;
+localhost is not a usable phone link. The hosted site is a separate server,
+not a way to join a local household session. The phone must pass the
 existing household gate where enabled. Its motion events do not make it the
 receiver's DoorSense video source.
 

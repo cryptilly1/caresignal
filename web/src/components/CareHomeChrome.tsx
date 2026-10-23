@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { BrandMark } from "./OnboardingFlow";
+import { BrandMark } from "./BrandMark";
 
 export function CareHomeHeader({ initials, onAccount, accountIcon = false, centered = false, back }: {
   initials: string; onAccount?: () => void; accountIcon?: boolean; centered?: boolean; back?: { href: string; label: string };
