@@ -8,6 +8,11 @@ Ring setup, and the multi-device demo flow, see the repository
 
 For Netlify, the repository-root `netlify.toml` builds the `web` application with
 Node 22 and uses Netlify's automatic Next.js adapter. Configure production
+builds from `cryptilly1/caresignal` on its production branch,
+`cryptilly1-porchlight-continuation`. With `web` as the base directory, `.next`
+is the publish directory. Pushes to that branch trigger Netlify through the
+repository webhook; environment values stay in Netlify, not GitHub source.
+Configure production
 environment variables in Netlify, never in committed files. Public Supabase
 connection settings in `.env.example` enable Supabase account authentication;
 durable/shared household storage, household membership permissions, and shared
@@ -50,6 +55,8 @@ App routes include a Web/Mobile viewport switch. Mobile uses a 390px iframe
 with its own viewport so media queries and fixed controls behave as on a phone;
 it does not change household authorization. The website has separate entry
 points for the care circle, receiver, DoorSense, camera, voice, and audio tools.
+Web mode spans the browser width; its welcome screen fills the space below the
+viewport toolbar. The old centered phone shell remains confined to mobile preview.
 
 **Connect camera dummy** opens the shared camera setup drawer, also available
 in Settings → Ring account / Connect Ring and DoorSense camera settings.

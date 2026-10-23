@@ -34,7 +34,7 @@ export function AppViewport({ children }: { children: React.ReactNode }) {
   if (pathname === "/" || embedded) return children;
 
   return (
-    <div className="app-viewport">
+    <div className={`app-viewport${view ? ` app-viewport--${view}` : ""}`}>
       <header className="app-viewport__toolbar">
         <Link href="/" className="app-viewport__brand">CareSignal <span>website</span><ArrowUpRight size={14} /></Link>
         <div className="app-viewport__switch" role="group" aria-label="App viewport">
