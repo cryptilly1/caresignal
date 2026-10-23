@@ -87,6 +87,9 @@ stay proportionate across screen sizes, video frames preserve their proportions,
 and empty-camera views grow for larger text. Primary/help controls use
 higher-contrast blue/red fills; leave/cancel actions have a separate soft-red
 treatment. These styles do not change camera permissions, sharing, or call logic.
+The sound drawer keeps its compact close icon inside a 44px target and uses
+dedicated volume sliders, not text-field styling: 6px tracks, 22px thumbs,
+visible percentages, keyboard focus, and native 5% volume steps.
 
 The public product website lives at `/`; **Open app** leads to `/welcome`.
 The welcome drawer supports email/password sign-in or sign-up and Google OAuth;

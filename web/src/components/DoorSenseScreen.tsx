@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { AudioLines, BellRing, Camera, CameraOff, Check, ChevronRight, DoorClosed, Heart, Mic, MicOff, Moon, PhoneOff, Settings2, ShieldCheck, Users, Volume2, VolumeX, X } from "lucide-react";
 import { BottomDrawer } from "./BottomDrawer";
 import { CareHomeHeader } from "./CareHomeChrome";
@@ -126,8 +126,8 @@ export function DoorSenseScreen() {
     </div>
     {audioSettings && <BottomDrawer title="DoorSense sound" onClose={() => setAudioSettings(false)}>
       <div className="settings-form">
-        <label className="onboarding-field"><span>Caregiver volume · {Math.round(door.caregiverVolume * 100)}%</span><input aria-label="Caregiver volume" type="range" min={0} max={1} step={0.05} value={door.caregiverVolume} onChange={(event) => door.setCaregiverVolume(Number(event.target.value))} /></label>
-        <label className="onboarding-field"><span>Visitor volume · {Math.round(door.visitorVolume * 100)}%</span><input aria-label="Visitor volume" type="range" min={0} max={1} step={0.05} value={door.visitorVolume} onChange={(event) => door.setVisitorVolume(Number(event.target.value))} /></label>
+        <label className="doorsense-volume"><span>Caregiver volume <output>{Math.round(door.caregiverVolume * 100)}%</output></span><input aria-label="Caregiver volume" aria-valuetext={`${Math.round(door.caregiverVolume * 100)} percent`} style={{ "--volume-level": `${Math.round(door.caregiverVolume * 100)}%` } as CSSProperties} type="range" min={0} max={1} step={0.05} value={door.caregiverVolume} onChange={(event) => door.setCaregiverVolume(Number(event.target.value))} /></label>
+        <label className="doorsense-volume"><span>Visitor volume <output>{Math.round(door.visitorVolume * 100)}%</output></span><input aria-label="Visitor volume" aria-valuetext={`${Math.round(door.visitorVolume * 100)} percent`} style={{ "--volume-level": `${Math.round(door.visitorVolume * 100)}%` } as CSSProperties} type="range" min={0} max={1} step={0.05} value={door.visitorVolume} onChange={(event) => door.setVisitorVolume(Number(event.target.value))} /></label>
         <p className="settings-note">Separate sound controls for the caregiver link and the doorbell microphone. Volume does not start a camera or a call.</p>
         <button className="cs-button cs-button--glass" onClick={() => setAudioSettings(false)} type="button">Done</button>
       </div>
