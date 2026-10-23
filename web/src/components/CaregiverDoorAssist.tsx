@@ -271,7 +271,7 @@ export function CaregiverDoorAssist({ hideIdle = false }: { hideIdle?: boolean }
           micRef.current?.getAudioTracks().forEach(track => { track.enabled = !micOn; });
           setMicOn(!micOn);
         }}>{micOn ? <Mic aria-hidden="true" size={20} /> : <MicOff aria-hidden="true" size={20} />}{micOn ? "Mute" : "Unmute"}</button>}
-        <button className="cs-button cs-button--glass" type="button" onClick={() => void stop().catch(cause => setError(cause.message))}><PhoneOff aria-hidden="true" size={20} />{phase === "connecting" ? "Cancel connection" : "Leave call"}</button>
+        <button className="cs-button cs-button--glass door-call-end" type="button" onClick={() => void stop().catch(cause => setError(cause.message))}><PhoneOff aria-hidden="true" size={20} />{phase === "connecting" ? "Cancel connection" : "Leave call"}</button>
       </>}
     </div>
     <Link className="live-door-assist__alert" href={linkedAlert ? `/alerts/${linkedAlert.id}` : "/escalation"}><span><strong>Open door-help alert</strong><small>{linkedAlert?.title ?? active?.label ?? "Care alerts stay open until cleared"}</small></span><ArrowUpRight aria-hidden="true" size={19} /></Link>

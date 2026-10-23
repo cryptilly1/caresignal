@@ -78,6 +78,16 @@ Household polling, phone-camera sightings, Ring sync, and live door assist stay
 mounted while the simulation drawer is open. Live feeds still require operational
 access and configured devices; a simulation does not validate a real Ring stream.
 
+DoorSense, its My Day card, and both live-assist and call-preview controls share
+a scoped type and shape scale: 16px action labels, 14px supporting copy,
+13px status text, 24px cards, and 16px control corners. Actions remain at least
+48px high (56px for receiver response rows); icon-only call controls have 44px
+targets. Text can wrap and grow instead of being forced onto one line. Headings
+stay proportionate across screen sizes, video frames preserve their proportions,
+and empty-camera views grow for larger text. Primary/help controls use
+higher-contrast blue/red fills; leave/cancel actions have a separate soft-red
+treatment. These styles do not change camera permissions, sharing, or call logic.
+
 The public product website lives at `/`; **Open app** leads to `/welcome`.
 The welcome drawer supports email/password sign-in or sign-up and Google OAuth;
 GitHub is not currently offered. Required fields, provider failures, and account

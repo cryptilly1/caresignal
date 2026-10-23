@@ -14,9 +14,9 @@ import { DoorCameraPreview } from "./DoorCameraPreview";
 import { DoorMotionNotice } from "./DoorMotionNotice";
 
 function DoorAction({ icon, title, detail, tone = "glass", disabled, onClick }: {
-  icon: ReactNode; title: string; detail?: string; tone?: "glass" | "primary" | "help"; disabled?: boolean; onClick: () => void;
+  icon: ReactNode; title: string; detail?: string; tone?: "glass" | "primary" | "help" | "end"; disabled?: boolean; onClick: () => void;
 }) {
-  return <button className={`cs-button doorsense-action ${tone === "help" ? "receiver-help-button" : `cs-button--${tone}`}`} disabled={disabled} onClick={onClick} type="button">
+  return <button className={`cs-button doorsense-action ${tone === "help" ? "receiver-help-button" : tone === "end" ? "cs-button--glass door-call-end" : `cs-button--${tone}`}`} disabled={disabled} onClick={onClick} type="button">
     <span className="doorsense-action__icon">{icon}</span><span><strong>{title}</strong>{detail && <small>{detail}</small>}</span>
   </button>;
 }
@@ -90,7 +90,7 @@ export function DoorSenseScreen() {
             <h2>{connected ? `${caregiver} is here with you` : `Waiting for ${caregiver} to answer`}</h2>
             <p>{connected ? "The camera link is connected. Caregiver voice plays here when available." : "Your caregiver can join the camera view and talk with you."}</p>
             <div className="settings-inset doorsense-call__privacy"><strong>{connected ? door.micMuted ? "Your mic is muted" : "Your mic is on" : "No call connected yet"}</strong><p>{connected ? door.micMuted ? "Your microphone isn’t sending sound." : "Your microphone goes to the caregiver link, not the visitor speaker." : "Your microphone stays muted while you wait."}</p></div>
-            <DoorAction icon={connected ? <PhoneOff aria-hidden="true" size={24} /> : <X aria-hidden="true" size={24} />} title={connected ? "End call" : "Cancel sharing request"} disabled={door.busy} onClick={() => void door.endSession(false)} />
+            <DoorAction icon={connected ? <PhoneOff aria-hidden="true" size={24} /> : <X aria-hidden="true" size={24} />} title={connected ? "End call" : "Cancel sharing request"} tone="end" disabled={door.busy} onClick={() => void door.endSession(false)} />
           </section> : <section className="care-card doorsense-responses">
             <header className="home-section-heading"><h2>What would you like to do?</h2></header>
             <p className="settings-note">{visitWindowHint(state)}</p>

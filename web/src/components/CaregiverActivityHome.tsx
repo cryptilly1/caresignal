@@ -273,7 +273,7 @@ export function CaregiverActivityHome() {
           )}
           <div className="door-help-panel__actions">
             <button aria-pressed={connected ? muted : undefined} className="cs-button cs-button--primary" onClick={() => connected ? setMuted(!muted) : joinCall()} type="button">            <HomeIcon name={connected ? "mute" : "video"} size={24} />{connected ? muted ? "Unmute preview" : "Mute preview" : "Preview call"}</button>
-            <button className="cs-button cs-button--glass door-end-call" onClick={endCall} type="button"><HomeIcon name={connected ? "leave" : "decline"} size={24} />{connected ? "Leave call" : "Decline call"}</button>
+            <button className="cs-button cs-button--glass door-end-call door-call-end" onClick={endCall} type="button"><HomeIcon name={connected ? "leave" : "decline"} size={24} />{connected ? "Leave call" : "Decline call"}</button>
           </div>
           {connected
             ? <p className="home-footnote">Stay connected while you browse Home. Leaving this call won’t clear the care alert.</p>
