@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CareSignal phone camera</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 1.25rem;
+        max-width: 480px;
+        margin-inline: auto;
+        color: #fff;
+        font-family: system-ui, -apple-system, sans-serif;
+        background: linear-gradient(180deg, #7eb8e8 0%, #c4a882 100%);
+      }
+      h1 {
+        font-size: 1.75rem;
+        margin: 0;
+      }
+      p {
+        opacity: 0.85;
+        font-size: 14px;
+        line-height: 1.4;
+        margin-top: 8px;
+      }
+      .stage {
+        margin-top: 20px;
+        position: relative;
+        overflow: hidden;
+        border-radius: 20px;
+        background: rgba(0, 0, 0, 0.45);
+        aspect-ratio: 3 / 4;
+        max-height: min(68vh, 560px);
+        width: min(100%, calc(min(68vh, 560px) * 3 / 4));
+        margin-inline: auto;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+      video,
+      canvas {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        display: block;
+      }
+      canvas {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        transform: none !important; /* never mirror the overlay */
+      }
+      /* Mirror preview video only */
+      .stage.mirrored video {
+        transform: scaleX(-1);
+      }
+      #labels {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 2;
+        transform: none !important;
+      }
+      .det-label {
+        position: absolute;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #111;
+        white-space: nowrap;
+        direction: ltr;
+        unicode-bidi: isolate;
+        transform: none !important;
+      }
+      button.active {
+        background: #fff;
+        color: #1a1a1a;
+      }
+      .off {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+        z-index: 2;
+        background: rgba(0, 0, 0, 0.35);
+        pointer-events: none;
+        text-align: center;
+        padding: 1rem;
+      }
+      .off[hidden],
+      .stage.live .off {
+        display: none !important;
+      }
+      .banner {
+        position: absolute;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: rgba(48, 209, 88, 0.92);
+        font-size: 14px;
+        font-weight: 600;
+        text-align: center;
+        display: none;
+        z-index: 3;
+      }
+      .banner.show {
+        display: block;
+      }
+      .legend {
+        display: flex;
+        gap: 12px;
+        margin-top: 10px;
+        font-size: 12px;
+        opacity: 0.95;
+        flex-wrap: wrap;
+      }
+      .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .swatch {
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        border: 2px solid currentColor;
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+        flex-wrap: wrap;
+      }
+      button {
+        border: 0;
+        border-radius: 999px;
+        padding: 12px 18px;
+        background: #fff;
+        color: #1a1a1a;
+        font-weight: 600;
+        font-size: 15px;
+      }
+      button.secondary {
+        background: rgba(255, 255, 255, 0.18);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+      }
+      #status,
+      #settingsLabel {
+        margin-top: 12px;
+        font-size: 13px;
+        opacity: 0.9;
+      }
+      #err {
+        margin-top: 12px;
+        color: #fecaca;
+        font-size: 14px;
+        white-space: pre-wrap;
+      }
+      a {
+        display: inline-block;
+        margin-top: 28px;
+        color: #fff;
+        opacity: 0.85;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Phone camera</h1>
+    <p id="hint">
+      Detector: <strong>COCO-SSD</strong> (browser). Green = person (big enough
+      box). Yellow = small / partial person-like. White = other objects. YOLO +
+      OSNet Re-ID is the next server-side step.
+    </p>
+    <div class="stage" id="stage">
+      <video id="v" playsinline muted autoplay></video>
+      <canvas id="overlay"></canvas>
+      <div id="labels" aria-hidden="true"></div>
+      <div class="off" id="off">Tap <strong>Start camera</strong> below</div>
+      <div class="banner" id="banner">Person</div>
+    </div>
+    <div class="legend">
+      <span><i class="swatch" style="color: #30d158"></i> Person</span>
+      <span><i class="swatch" style="color: #ffd60a"></i> Partial / small</span>
+      <span><i class="swatch" style="color: #fff"></i> Object / animal</span>
+    </div>
+    <p id="settingsLabel">Settings: loading…</p>
+    <p id="status">Watching: off</p>
+    <p id="err" hidden></p>
+    <div class="row">
+      <button type="button" id="start">Start camera</button>
+      <button type="button" id="stop" class="secondary" hidden>Stop</button>
+      <button type="button" id="flip" class="secondary" hidden>Flip lens</button>
+      <button type="button" id="mirror" class="secondary" hidden>Mirror</button>
+      <button type="button" id="test" class="secondary" hidden>Test notify</button>
+    </div>
+    <a href="/today">← Caregiver home</a>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+    <script>
+      (function () {
+        var ANIMALS = {
+          bird: 1,
+          cat: 1,
+          dog: 1,
+          horse: 1,
+          sheep: 1,
+          cow: 1,
+          elephant: 1,
+          bear: 1,
+          zebra: 1,
+          giraffe: 1,
+        };
+
+        var video = document.getElementById("v");
+        var overlay = document.getElementById("overlay");
+        var octx = overlay.getContext("2d");
+        var labelsEl = document.getElementById("labels");
+        var off = document.getElementById("off");
+        var err = document.getElementById("err");
+        var statusEl = document.getElementById("status");
+        var settingsLabel = document.getElementById("settingsLabel");
+        var banner = document.getElementById("banner");
+        var stage = document.getElementById("stage");
+        var startBtn = document.getElementById("start");
+        var stopBtn = document.getElementById("stop");
+        var flipBtn = document.getElementById("flip");
+        var mirrorBtn = document.getElementById("mirror");
+        var testBtn = document.getElementById("test");
+
+        var stream = null;
+        var facing = "environment";
+        var mirrored = false;
+        var running = false;
+        var raf = 0;
+        var coolUntil = 0;
+        var hadPerson = false;
+        var personGoneAt = 0;
+        var alertedThisPresence = false;
+        var lastAlertLabel = "";
+        var readyAt = 0;
+        var boxes = [];
+        var model = null;
+        var detectBusy = false;
+        var lastDetect = 0;
+        var personStreak = 0;
+        var settings = {
+          mode: "person",
+          sensitivity: "medium",
+          alertPolicy: "pact",
+        };
+
+        function conf() {
+          // fingerFloor = reject tiny boxes (hands). Half-body / no waist still
+          // counts as green when score clears the threshold.
+          if (settings.sensitivity === "low")
+            return {
+              score: 0.5,
+              highScore: 0.62,
+              fingerFloor: 0.008,
+              partialFrac: 0.015,
+              streak: 1,
+            };
+          if (settings.sensitivity === "high")
+            return {
+              score: 0.32,
+              highScore: 0.48,
+              fingerFloor: 0.004,
+              partialFrac: 0.006,
+              streak: 1,
+            };
+          return {
+            score: 0.4,
+            highScore: 0.55,
+            fingerFloor: 0.006,
+            partialFrac: 0.01,
+            streak: 1,
+          };
+        }
+
+        function showError(msg) {
+          err.hidden = !msg;
+          err.textContent = msg || "";
+        }
+        function setStatus(t) {
+          statusEl.textContent = t;
+        }
+        function setOn(on) {
+          off.hidden = !!on;
+          if (on) {
+            off.setAttribute("hidden", "");
+            stage.classList.add("live");
+          } else {
+            off.removeAttribute("hidden");
+            stage.classList.remove("live");
+          }
+          startBtn.hidden = on;
+          stopBtn.hidden = !on;
+          flipBtn.hidden = !on;
+          mirrorBtn.hidden = !on;
+          testBtn.hidden = !on;
+        }
+        function applyMirror() {
+          stage.classList.toggle("mirrored", mirrored);
+          mirrorBtn.classList.toggle("active", mirrored);
+          mirrorBtn.textContent = mirrored ? "Mirror on" : "Mirror";
+          mirrorBtn.classList.toggle("secondary", !mirrored);
+        }
+        function renderSettings() {
+          settingsLabel.textContent =
+            "Detect: " +
+            settings.mode +
+            " · COCO-SSD · " +
+            settings.sensitivity +
+            " · alerts: " +
+            settings.alertPolicy;
+        }
+
+        function sizeOverlay() {
+          var w = stage.clientWidth || 1;
+          var h = stage.clientHeight || 1;
+          if (overlay.width !== w || overlay.height !== h) {
+            overlay.width = w;
+            overlay.height = h;
+          }
+        }
+
+        function mapBox(box) {
+          // Detector space → overlay. When video is mirrored, only shift X so the
+          // rectangle tracks the subject — never scaleX the overlay (that mirrored text).
+          var vw = video.videoWidth || 1;
+          var vh = video.videoHeight || 1;
+          var cw = overlay.width;
+          var ch = overlay.height;
+          var scale = Math.max(cw / vw, ch / vh);
+          var ox = (cw - vw * scale) / 2;
+          var oy = (ch - vh * scale) / 2;
+          var x = mirrored ? vw - box[0] - box[2] : box[0];
+          return [
+            ox + x * scale,
+            oy + box[1] * scale,
+            box[2] * scale,
+            box[3] * scale,
+          ];
+        }
+
+        function drawBoxes() {
+          sizeOverlay();
+          octx.setTransform(1, 0, 0, 1, 0, 0);
+          octx.clearRect(0, 0, overlay.width, overlay.height);
+          labelsEl.innerHTML = "";
+          for (var i = 0; i < boxes.length; i++) {
+            var item = boxes[i];
+            var m = mapBox(item.box);
+            var x = m[0],
+              y = m[1],
+              w = m[2],
+              h = m[3];
+            // Box outline only on canvas (no canvas text)
+            octx.strokeStyle = item.color;
+            octx.lineWidth = Math.max(3, overlay.width / 120);
+            octx.strokeRect(x, y, w, h);
+            // Label as HTML — always LTR, never affected by video mirror
+            var lab = document.createElement("div");
+            lab.className = "det-label";
+            lab.textContent = item.label;
+            lab.style.background = item.color;
+            lab.style.left = Math.max(0, x) + "px";
+            lab.style.top = Math.max(0, y - 20) + "px";
+            labelsEl.appendChild(lab);
+          }
+        }
+
+        function classify(predictions) {
+          var c = conf();
+          var frameArea = Math.max(
+            1,
+            (video.videoWidth || 1) * (video.videoHeight || 1),
+          );
+          var next = [];
+          for (var i = 0; i < predictions.length; i++) {
+            var p = predictions[i];
+            var name = String(p.class || "").toLowerCase();
+            var score = p.score || 0;
+            if (score < c.score * 0.85) continue;
+            var b = p.bbox; // [x,y,w,h]
+            if (!b || b.length < 4) continue;
+            var area = b[2] * b[3];
+            var frac = area / frameArea;
+
+            if (name === "person") {
+              // Green + alert: confident person — full OR half body (no waist OK).
+              // High score overrides small box size so torso/upper body still alerts.
+              var greenPerson =
+                score >= c.score &&
+                frac >= c.fingerFloor &&
+                (frac >= c.partialFrac || score >= c.highScore);
+              if (greenPerson) {
+                next.push({
+                  kind: "person",
+                  color: "#30d158",
+                  label: "Person " + Math.round(score * 100) + "%",
+                  box: b,
+                });
+              } else if (frac >= c.fingerFloor) {
+                // Low-conf or tiny — yellow, no alert
+                next.push({
+                  kind: "partial",
+                  color: "#ffd60a",
+                  label: "Partial " + Math.round(score * 100) + "%",
+                  box: b,
+                });
+              }
+              continue;
+            }
+
+            if (score < c.score) continue;
+            var pretty = name.charAt(0).toUpperCase() + name.slice(1);
+            next.push({
+              kind: ANIMALS[name] ? "animal" : "object",
+              color: "#ffffff",
+              label: pretty + " " + Math.round(score * 100) + "%",
+              box: b,
+            });
+          }
+          return next;
+        }
+
+        async function ensureModel() {
+          if (model) return;
+          if (!window.cocoSsd) {
+            throw new Error("COCO-SSD script failed to load (CDN).");
+          }
+          setStatus("Loading COCO-SSD…");
+          // lite_mobilenet_v2 is light enough for phones
+          model = await cocoSsd.load({ base: "lite_mobilenet_v2" });
+          setStatus("COCO-SSD ready");
+        }
+
+        async function pullSettings() {
+          try {
+            var res = await fetch("/api/camera-settings", { cache: "no-store" });
+            if (!res.ok) return;
+            settings = await res.json();
+            renderSettings();
+          } catch (e) {}
+        }
+
+        function notifyLocal(label) {
+          banner.textContent = label;
+          banner.classList.add("show");
+          setTimeout(function () {
+            banner.classList.remove("show");
+          }, 2500);
+          try {
+            if (navigator.vibrate) navigator.vibrate([120, 60, 120]);
+          } catch (e) {}
+          if (
+            "Notification" in window &&
+            Notification.permission === "granted"
+          ) {
+            try {
+              new Notification("CareSignal", {
+                body: label,
+                tag: "door-person",
+              });
+            } catch (e) {}
+          }
+        }
+
+        async function reportSighting(label) {
+          notifyLocal(label);
+          lastAlertLabel = "Sending…";
+          setStatus("Sending alert to Today…");
+          try {
+            var res = await fetch("/api/door-sighting", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ kind: "motion", label: label }),
+            });
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            lastAlertLabel =
+              "Alert sent · " + new Date().toLocaleTimeString();
+            setStatus(lastAlertLabel);
+            showError("");
+          } catch (e) {
+            alertedThisPresence = false; // allow retry on next green frame
+            lastAlertLabel = "";
+            showError(
+              "Could not reach CareSignal server (tunnel?). Keep Mac server running.",
+            );
+            setStatus("Alert failed — will retry");
+          }
+        }
+
+        async function detectOnce() {
+          if (!model || !running || detectBusy) return;
+          if (video.readyState < 2) return;
+          if (Date.now() < readyAt) return;
+          if (Date.now() - lastDetect < 280) return;
+          detectBusy = true;
+          lastDetect = Date.now();
+          try {
+            var preds = await model.detect(video, 12);
+            var raw = classify(preds);
+            var sawPerson = false;
+            var partial = 0;
+            var other = 0;
+            for (var i = 0; i < raw.length; i++) {
+              if (raw[i].kind === "person") sawPerson = true;
+              else if (raw[i].kind === "partial") partial++;
+              else other++;
+            }
+
+            // Green person box = positive → send alert once per entry into frame
+            if (sawPerson) personStreak++;
+            else personStreak = Math.max(0, personStreak - 1);
+            var need = conf().streak;
+            var confirmed = sawPerson && personStreak >= need;
+
+            boxes = raw;
+            var now = Date.now();
+
+            if (confirmed) {
+              hadPerson = true;
+              personGoneAt = 0;
+              // First green of this presence → POST alert immediately
+              if (!alertedThisPresence) {
+                alertedThisPresence = true;
+                coolUntil = now + 3000; // tiny gap only against double-fire
+                void reportSighting("Person at the door · COCO-SSD");
+              }
+            } else if (hadPerson) {
+              if (!personGoneAt) personGoneAt = now;
+              // Left frame ~1s → next green can alert again
+              if (now - personGoneAt > 1000) {
+                hadPerson = false;
+                personGoneAt = 0;
+                alertedThisPresence = false;
+              }
+            } else if (
+              settings.mode === "motion" &&
+              partial > 0 &&
+              now > coolUntil
+            ) {
+              coolUntil = now + 8000;
+              void reportSighting("Motion at the door · COCO-SSD");
+            }
+
+            var head = confirmed
+              ? alertedThisPresence && lastAlertLabel
+                ? lastAlertLabel
+                : "Person · sending alert…"
+              : sawPerson
+                ? "Person"
+                : "Watching";
+            setStatus(
+              head +
+                " · dets " +
+                preds.length +
+                " · partial " +
+                partial +
+                " · other " +
+                other
+            );
+          } catch (e) {
+            console.error(e);
+            setStatus("Detect error — retrying");
+            showError(String((e && e.message) || e));
+          } finally {
+            detectBusy = false;
+          }
+        }
+
+        function loop() {
+          if (!running) return;
+          drawBoxes();
+          detectOnce();
+          raf = requestAnimationFrame(loop);
+        }
+
+        async function ensureNotifyPermission() {
+          if (!("Notification" in window)) return;
+          if (Notification.permission === "default") {
+            await Notification.requestPermission();
+          }
+        }
+
+        function stopTracksOnly() {
+          if (raf) cancelAnimationFrame(raf);
+          raf = 0;
+          running = false;
+          if (stream) {
+            stream.getTracks().forEach(function (t) {
+              t.stop();
+            });
+          }
+          stream = null;
+          video.srcObject = null;
+          boxes = [];
+          hadPerson = false;
+          personGoneAt = 0;
+          alertedThisPresence = false;
+          lastAlertLabel = "";
+          personStreak = 0;
+          octx && octx.clearRect(0, 0, overlay.width, overlay.height);
+          if (labelsEl) labelsEl.innerHTML = "";
+          banner.classList.remove("show");
+        }
+
+        function stop() {
+          stopTracksOnly();
+          setOn(false);
+          off.textContent = "Tap Start camera below";
+          setStatus("Watching: off");
+        }
+
+        async function start(face) {
+          showError("");
+          if (!window.isSecureContext && location.hostname !== "localhost") {
+            showError("Need https:// — use the Cloudflare link on your phone.");
+            return;
+          }
+          stopTracksOnly();
+          stage.classList.remove("live");
+          off.removeAttribute("hidden");
+          off.textContent = "Opening camera…";
+          setStatus("Opening camera…");
+          await pullSettings();
+          ensureNotifyPermission().catch(function () {});
+
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({
+              video: {
+                facingMode: { ideal: face || facing },
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+              },
+              audio: false,
+            });
+            video.srcObject = stream;
+            await video.play();
+            facing = face || facing;
+            setOn(true);
+            sizeOverlay();
+            setStatus("Camera live · loading COCO-SSD…");
+          } catch (e) {
+            var msg = (e && e.message) || "Could not open the camera.";
+            off.textContent = "Camera blocked — tap Start again";
+            setOn(false);
+            setStatus("Watching: off");
+            showError(
+              /permission|NotAllowed|denied/i.test(msg)
+                ? "Allow Camera in the browser prompt / Settings, then tap Start again."
+                : msg
+            );
+            return;
+          }
+
+          try {
+            await ensureModel();
+          } catch (e) {
+            console.error(e);
+            setStatus("Camera live · model failed");
+            showError(
+              "Video works, but COCO-SSD failed: " +
+                ((e && e.message) || e) +
+                "\nCheck network and tap Start again."
+            );
+            return;
+          }
+
+          running = true;
+          readyAt = Date.now() + 400;
+          coolUntil = 0;
+          hadPerson = false;
+          personGoneAt = 0;
+          alertedThisPresence = false;
+          lastAlertLabel = "";
+          personStreak = 0;
+          setStatus("Watching — step into frame");
+          loop();
+        }
+
+        startBtn.onclick = function () {
+          start(facing);
+        };
+        stopBtn.onclick = stop;
+        flipBtn.onclick = function () {
+          start(facing === "environment" ? "user" : "environment");
+        };
+        mirrorBtn.onclick = function () {
+          mirrored = !mirrored;
+          applyMirror();
+        };
+        testBtn.onclick = function () {
+          reportSighting("Test · person at door");
+        };
+        applyMirror();
+        window.addEventListener("resize", sizeOverlay);
+
+        pullSettings();
+        setInterval(pullSettings, 4000);
+        setTimeout(function () {
+          ensureModel().catch(function () {});
+        }, 200);
+      })();
+    </script>
+  </body>
+</html>

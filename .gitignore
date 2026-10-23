@@ -1,0 +1,23 @@
+# Local environment files and credentials
+.env
+.env.*
+!.env.example
+
+# Dependencies and generated output
+node_modules/
+.next/
+build/
+dist/
+coverage/
+*.tsbuildinfo
+.vercel/
+.netlify/
+
+# OS files and local tooling
+.DS_Store
+*.pem
+/.adbt-config.json
+/COPILOT_HANDOFF.md
+
+# Old design references are not required to build or run the app
+/Doorsense feature/

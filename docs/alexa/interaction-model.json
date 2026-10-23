@@ -1,0 +1,120 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "care signal",
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
+        {
+          "name": "ImOkayIntent",
+          "slots": [],
+          "samples": [
+            "I'm okay",
+            "I am okay",
+            "I'm fine",
+            "check in",
+            "I'm doing fine",
+            "good morning check in"
+          ]
+        },
+        {
+          "name": "TookMedicineIntent",
+          "slots": [],
+          "samples": [
+            "I took my medicine",
+            "I took my medication",
+            "I took my pills",
+            "log medicine",
+            "medicine taken"
+          ]
+        },
+        {
+          "name": "WentForWalkIntent",
+          "slots": [],
+          "samples": [
+            "I went for a walk",
+            "I went walking",
+            "log a walk",
+            "I took a stroll"
+          ]
+        },
+        {
+          "name": "TellCaregiverIntent",
+          "slots": [],
+          "samples": [
+            "tell my caregiver",
+            "tell my family",
+            "notify my caregiver",
+            "call my caregiver",
+            "get my caregiver",
+            "alert my family"
+          ]
+        },
+        {
+          "name": "NeedHelpIntent",
+          "slots": [],
+          "samples": [
+            "I need help",
+            "help me",
+            "send help",
+            "emergency",
+            "I'm scared"
+          ]
+        },
+        {
+          "name": "DoorExpectingIntent",
+          "slots": [],
+          "samples": [
+            "I'm expecting someone",
+            "I'm expecting",
+            "I know who it is",
+            "it's the nurse",
+            "it's a delivery",
+            "package delivery"
+          ]
+        },
+        {
+          "name": "DismissDoorIntent",
+          "slots": [],
+          "samples": [
+            "not now",
+            "dismiss",
+            "never mind",
+            "ignore it",
+            "cancel"
+          ]
+        },
+        {
+          "name": "DoorStatusIntent",
+          "slots": [],
+          "samples": [
+            "what's at the door",
+            "anyone at the door",
+            "door status",
+            "is someone at the door",
+            "doorbell status"
+          ]
+        }
+      ],
+      "types": []
+    }
+  }
+}
