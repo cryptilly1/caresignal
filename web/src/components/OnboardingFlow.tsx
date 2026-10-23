@@ -10,7 +10,7 @@ import { useEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent }
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { useRouter } from "next/navigation";
 import { CheckInPlan, DutyPlan, HouseholdReview, InviteMembers } from "./CareSetupSteps";
-import { CARE_SETUP_KEY, emptyCareSetup, parseCareSetup, type CareSetup } from "@/lib/care-setup";
+import { CARE_SETUP_KEY, emptyCareSetup, missingCareSetupDetails, parseCareSetup, type CareSetup } from "@/lib/care-setup";
 import { DrawerSelect } from "./BottomDrawer";
 import { signedInAccountName } from "@/lib/account-profile";
 
@@ -182,6 +182,8 @@ function FormField({
   value,
   onChange,
   type = "text",
+  required = false,
+  invalid = false,
 }: {
   id: string;
   label: string;
@@ -189,11 +191,15 @@ function FormField({
   value: string;
   onChange: (value: string) => void;
   type?: "text" | "email";
+  required?: boolean;
+  invalid?: boolean;
 }) {
   return (
     <label className="onboarding-field" htmlFor={id}>
-      <span>{label}</span>
+      <span>{label}{required ? " *" : ""}</span>
       <input
+        required={required}
+        aria-invalid={invalid || undefined}
         autoComplete="off"
         id={id}
         onChange={(event) => onChange(event.target.value)}
@@ -240,6 +246,7 @@ function OnboardingWizard() {
   const [settings, setSettings] = useState(initial.setup);
   const [reviewReturn, setReviewReturn] = useState(false);
   const [message, setMessage] = useState(initial.error);
+  const [invalidField, setInvalidField] = useState("");
   const bodyRef = useRef<HTMLDivElement>(null);
   const roleTrackRef = useRef<HTMLDivElement>(null);
   const roleCardRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -347,6 +354,8 @@ function OnboardingWizard() {
       goToStep(1);
       return;
     }
+    if (!validateDetails()) return;
+    setInvalidField("");
     if (step === 5) updateSetup({ dutyEnabled: true });
     if (reviewReturn) {
       setReviewReturn(false);
@@ -366,6 +375,21 @@ function OnboardingWizard() {
     }
   }
 
+  function validateDetails() {
+    const missing = missingCareSetupDetails(setup);
+    if (!missing || step < missing.step) return true;
+    goToStep(missing.step);
+    setInvalidField(missing.field);
+    setMessage(missing.message);
+    requestAnimationFrame(() => {
+      const target = missing.field === "relationship"
+        ? bodyRef.current?.querySelector<HTMLButtonElement>(".drawer-select-trigger")
+        : document.getElementById(missing.field);
+      target?.focus();
+    });
+    return false;
+  }
+
   function goBack() {
     if (reviewReturn) {
       setReviewReturn(false);
@@ -376,6 +400,7 @@ function OnboardingWizard() {
   }
 
   function skipStep() {
+    if (!validateDetails()) return;
     if (step === 5) updateSetup({ dutyEnabled: false, backupIds: [] });
     if (step === 6) updateSetup({ checkInEnabled: false });
     if (reviewReturn) {
@@ -512,6 +537,8 @@ function OnboardingWizard() {
             <div className="onboarding-form-stack">
               <FormField
                 id="caregiver-full-name"
+                required
+                invalid={invalidField === "caregiver-full-name"}
                 label="Your full name"
                 onChange={setCaregiverName}
                 placeholder="Full Name"
@@ -549,6 +576,8 @@ function OnboardingWizard() {
               />
               <FormField
                 id="recipient-full-name"
+                required
+                invalid={invalidField === "recipient-full-name"}
                 label="Their full name"
                 onChange={setRecipientName}
                 placeholder="Full Name"
@@ -561,7 +590,7 @@ function OnboardingWizard() {
                 placeholder="Preferred Name"
                 value={recipientPreferredName}
               />
-              <DrawerSelect label="Their relationship to you" onChange={setRelationship} value={relationship} options={["Parent", "Spouse or partner", "Child", "Sibling", "Friend", "Other"].map((option) => ({ value: option, label: option }))} />
+              <DrawerSelect label="Their relationship to you *" onChange={setRelationship} value={relationship} options={["Parent", "Spouse or partner", "Child", "Sibling", "Friend", "Other"].map((option) => ({ value: option, label: option }))} />
               <div className="onboarding-reassurance">
                 <span className="onboarding-reassurance__lock" aria-hidden="true">
                   <LockShieldIcon />

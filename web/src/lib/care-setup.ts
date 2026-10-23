@@ -28,6 +28,13 @@ export type CareSetup = {
 
 export const CARE_SETUP_KEY = "caresignal-setup-v1";
 
+export function missingCareSetupDetails(setup: CareSetup) {
+  if (!setup.caregiverName.trim()) return { step: 1 as const, field: "caregiver-full-name", message: "Enter your full name to continue." };
+  if (!setup.recipientName.trim()) return { step: 2 as const, field: "recipient-full-name", message: "Enter your care receiver's full name to continue." };
+  if (!setup.relationship.trim()) return { step: 2 as const, field: "relationship", message: "Choose your relationship to the care receiver to continue." };
+  return null;
+}
+
 export const emptyCareSetup: CareSetup = {
   caregiverName: "",
   caregiverPreferredName: "",

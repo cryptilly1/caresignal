@@ -190,6 +190,11 @@ field and in the invitation review. The receiver's profile is kept separate.
 Signed-in account profile names prefill empty caregiver name fields and replace
 the receiver's untouched example name. Existing custom names remain editable and
 are not overwritten; signing in never fills the caregiver's receiver details.
+Caregiver setup requires the care lead's full name, the receiver's full name,
+and their relationship before advancing beyond those steps or finishing.
+Preferred names, receiver username, invitations, and explicitly skippable plans
+remain optional. Missing required details return focus to the relevant step;
+direct review links cannot finish an incomplete setup.
 This does not enable a live invitation or reminder service, and no code-request
 feature is provided yet.
 Invitation links can open `/onboarding/receiver?code=CS-7K4M`. Checking a code
