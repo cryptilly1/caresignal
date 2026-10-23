@@ -74,8 +74,9 @@ internal viewport; actual phones still render the responsive app directly.
 The shared preview frame name keeps provider sign-in outside both simulators.
 Caregiver and receiver onboarding have wide layouts above 760px: the role picker
 shows both choices together, and setup headings and forms sit in a centered
-column over a full-viewport background with white headings. Later setup keeps
-its existing multi-card layout. Phone role selection
+column over a full-viewport background with white headings. Setup cards stretch
+across that column on Web and tablet, with white inactive segment labels.
+Phone role selection
 remains a scrollable carousel. The desktop layout hides decorative phone chrome.
 Onboarding actions use the same feathered glass blur as the logged-in navigation;
 content scrolls underneath, with bottom padding keeping the last fields reachable.

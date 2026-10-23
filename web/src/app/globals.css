@@ -6002,6 +6002,9 @@ button.care-chip::after,
   .onboarding-flow .onboarding-body--wizard-step-1,
   .onboarding-flow .onboarding-body--wizard-step-2,
   .onboarding-flow .onboarding-body--wizard-step-3,
+  .onboarding-flow .onboarding-body--wizard-step-4 .care-stack,
+  .onboarding-flow .onboarding-body--wizard-step-5 .care-stack,
+  .onboarding-flow .onboarding-body--wizard-step-6 .care-stack,
   .onboarding-flow .receiver-body {
     display: flex;
     flex-direction: column;
@@ -6020,6 +6023,10 @@ button.care-chip::after,
   .onboarding-flow .receiver-stack {
     display: flex;
     flex-direction: column;
+  }
+
+  .onboarding-flow .care-stack > * {
+    width: 100%;
   }
 
   .onboarding-flow .onboarding-footer__single,
@@ -6066,6 +6073,10 @@ button.care-chip::after,
 
 .onboarding-flow .onboarding-role-heading,
 .onboarding-flow .onboarding-wizard-heading h1 {
+  color: #fff;
+}
+
+.onboarding-flow .onboarding-segmented button:not([aria-pressed="true"]) {
   color: #fff;
 }
 
