@@ -66,7 +66,8 @@ export function AccountScreen() {
               setPassword(""); setRecovery(false); window.history.replaceState(null, "", "/account"); setMessage("Password updated.");
             });
           }}><label className="onboarding-field">New password<input type="password" autoComplete="new-password" minLength={8} maxLength={128} required value={password} onChange={(event) => setPassword(event.target.value)} /></label><button className="cs-button cs-button--primary" disabled={busy}>Save new password</button></form>}
-          <Link className="cs-button cs-button--primary" href="/onboarding">Continue to setup preview</Link>
+          <Link className="cs-button cs-button--primary" href="/auth/continue">Open CareSignal</Link>
+          <Link className="care-text-button" href="/onboarding">Review care setup</Link>
           <button className="cs-button cs-button--glass" type="button" disabled={busy} onClick={() => void action(async () => {
             const { error: cause } = await supabaseBrowser().auth.signOut({ scope: "local" });
             if (cause) throw cause;

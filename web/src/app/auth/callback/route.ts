@@ -25,8 +25,11 @@ export async function GET(request: Request) {
   if (!code || !project || !key || url.searchParams.has("error")) return failure();
   const { cookies } = await import("next/headers");
   const incoming = await cookies();
+  const intent = url.searchParams.get("intent");
+  const destination = new URL("/auth/continue", origin);
+  if (intent === "google" || intent === "signup") destination.searchParams.set("intent", intent);
   const response = NextResponse.redirect(new URL(
-    url.searchParams.get("next") === "recovery" ? "/account?password=update" : "/onboarding",
+    url.searchParams.get("next") === "recovery" ? "/account?password=update" : destination.href,
     origin,
   ));
   response.headers.set("Cache-Control", "no-store");

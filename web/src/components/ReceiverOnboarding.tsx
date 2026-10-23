@@ -11,7 +11,7 @@ import { CareHomeHeader } from "./CareHomeChrome";
 import { initials } from "@/lib/care-setup";
 import { StatusBar, inter, jakarta } from "./OnboardingFlow";
 import { BrandMark } from "./BrandMark";
-import { signedInAccountName } from "@/lib/account-profile";
+import { completeAccountOnboarding, signedInAccountName } from "@/lib/account-profile";
 import {
   DEMO_INVITE_CODE,
   DEMO_INVITER_NAME,
@@ -98,6 +98,7 @@ function ReceiverWizard({ initialView }: { initialView?: "day" }) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const codeInputRef = useRef<HTMLInputElement>(null);
   const nameEdited = useRef(false);
+  const finishing = useRef(false);
   useEffect(() => {
     let active = true;
     void signedInAccountName().then((name) => {
@@ -160,7 +161,7 @@ function ReceiverWizard({ initialView }: { initialView?: "day" }) {
       }
       if (save({ ...setup, joined: true, reminderChoice: null, completed: false })) goTo("joined");
     }
-    if (step === "joined" && save({ ...setup, completed: true })) router.push("/onboarding/my-day");
+    if (step === "joined") void finishSetup({ ...setup, completed: true });
   }
 
   function goBack() {
@@ -171,11 +172,24 @@ function ReceiverWizard({ initialView }: { initialView?: "day" }) {
   }
 
   function connectLater() {
-    if (save({ ...setup, completed: true })) router.push("/onboarding/my-day");
+    void finishSetup({ ...setup, completed: true });
   }
 
   function skipReminder() {
-    if (save({ ...setup, reminderChoice: null, completed: true })) router.push("/onboarding/my-day");
+    void finishSetup({ ...setup, reminderChoice: null, completed: true });
+  }
+
+  async function finishSetup(next: ReceiverSetup) {
+    if (finishing.current) return;
+    finishing.current = true;
+    try {
+      if (!save(next)) return;
+      await completeAccountOnboarding("receiver");
+      router.push("/onboarding/my-day");
+    } catch (error) {
+      console.error("Unable to finish receiver account setup", error);
+      setMessage("Your setup is saved on this device, but your account could not be updated. Check your connection and try again.");
+    } finally { finishing.current = false; }
   }
 
   const headings: Record<ReceiverStep, string> = {

@@ -1,6 +1,20 @@
 "use client";
 
 import { supabaseBrowser } from "./supabase-browser";
+import { accountSetupKey, type AccountRole } from "./account-navigation";
+
+export async function completeAccountOnboarding(role: AccountRole) {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) return;
+  const client = supabaseBrowser();
+  const { data, error } = await client.auth.getSession();
+  if (error) throw error;
+  if (!data.session) return;
+  localStorage.setItem(accountSetupKey(data.session.user.id), JSON.stringify(role));
+  const { error: updateError } = await client.auth.updateUser({
+    data: { caresignal_role: role, caresignal_onboarding_completed: true },
+  });
+  if (updateError) throw updateError;
+}
 
 export function accountProfileName(metadata: Record<string, unknown>) {
   const text = (value: unknown) => typeof value === "string" ? value.trim() : "";

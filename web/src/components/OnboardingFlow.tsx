@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import { CheckInPlan, DutyPlan, HouseholdReview, InviteMembers } from "./CareSetupSteps";
 import { CARE_SETUP_KEY, emptyCareSetup, missingCareSetupDetails, parseCareSetup, type CareSetup } from "@/lib/care-setup";
 import { DrawerSelect } from "./BottomDrawer";
-import { signedInAccountName } from "@/lib/account-profile";
+import { completeAccountOnboarding, signedInAccountName } from "@/lib/account-profile";
 
 export const inter = Inter({
   subsets: ["latin"],
@@ -247,6 +247,7 @@ function OnboardingWizard() {
   const [reviewReturn, setReviewReturn] = useState(false);
   const [message, setMessage] = useState(initial.error);
   const [invalidField, setInvalidField] = useState("");
+  const [saving, setSaving] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
   const roleTrackRef = useRef<HTMLDivElement>(null);
   const roleCardRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -345,7 +346,8 @@ function OnboardingWizard() {
     if (bodyRef.current) bodyRef.current.scrollTop = 0;
   }
 
-  function continueSetup() {
+  async function continueSetup() {
+    if (saving) return;
     if (step === 0) {
       if (role === "recipient") {
         router.push("/onboarding/receiver");
@@ -367,12 +369,14 @@ function OnboardingWizard() {
       return;
     }
     try {
+      setSaving(true);
       localStorage.setItem(CARE_SETUP_KEY, JSON.stringify(setup));
+      await completeAccountOnboarding("caregiver");
       router.push("/care-circle");
     } catch (error) {
       console.error("Unable to save care setup", error);
-      setMessage("Your setup could not be saved on this device. Allow browser storage and try again.");
-    }
+      setMessage("Your setup could not be fully saved. Check browser storage and your account connection, then try again.");
+    } finally { setSaving(false); }
   }
 
   function validateDetails() {
@@ -713,6 +717,7 @@ function OnboardingWizard() {
             <button
               className="cs-button cs-button--primary onboarding-footer__single"
               onClick={continueSetup}
+              disabled={saving}
               type="button"
             >
               Continue
@@ -726,6 +731,7 @@ function OnboardingWizard() {
             <div className="onboarding-footer__actions">
               <button
                 className="cs-button cs-button--glass"
+                disabled={saving}
                 onClick={goBack}
                 type="button"
               >
@@ -733,10 +739,11 @@ function OnboardingWizard() {
               </button>
               <button
                 className="cs-button cs-button--primary"
+                disabled={saving}
                 onClick={continueSetup}
                 type="button"
               >
-                {step === 7 ? "Finish Setup" : reviewReturn ? "Save changes" : "Continue"}
+                {saving ? "Saving setup..." : step === 7 ? "Finish Setup" : reviewReturn ? "Save changes" : "Continue"}
               </button>
             </div>
             {step === 5 || step === 6 ? (

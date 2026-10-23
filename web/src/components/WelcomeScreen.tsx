@@ -30,6 +30,23 @@ export function WelcomeScreen() {
   const [authError, setAuthError] = useState("");
 
   useEffect(() => {
+    let active = true;
+    async function resumeAccount() {
+      try {
+        if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) return;
+        const { data, error } = await supabaseBrowser().auth.getSession();
+        if (error) throw error;
+        if (active && data.session) router.replace("/auth/continue");
+      } catch (cause) {
+        console.error("Unable to resume account session", cause);
+        if (active) setAuthError("Your saved sign-in couldn't be restored. Please sign in again.");
+      }
+    }
+    void resumeAccount();
+    return () => { active = false; };
+  }, [router]);
+
+  useEffect(() => {
     if (new URLSearchParams(window.location.search).get("signin") !== "1") return;
     const timer = window.setTimeout(() => setShowEmailSheet(true), 0);
     return () => window.clearTimeout(timer);
@@ -73,10 +90,10 @@ export function WelcomeScreen() {
     try {
       const client = supabaseBrowser();
       const { data, error } = mode === "signup"
-        ? await client.auth.signUp({ email, password, options: { emailRedirectTo: accountCallback() } })
+        ? await client.auth.signUp({ email, password, options: { emailRedirectTo: accountCallback(), data: { caresignal_onboarding_completed: false } } })
         : await client.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      if (data.session) router.push("/onboarding");
+      if (data.session) router.replace(`/auth/continue?intent=${mode}`);
       else {
         form.reset();
         setNotice("Check your email to confirm your account. If you already have an account, sign in instead. Open the confirmation link in this browser.");

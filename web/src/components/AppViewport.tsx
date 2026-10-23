@@ -61,7 +61,7 @@ export function AppViewport({ children }: { children: React.ReactNode }) {
     requestAnimationFrame(() => (hidden ? showRef : hideRef).current?.focus());
   }
 
-  if (pathname === "/" || embedded || nativeMobile) return children;
+  if (pathname === "/" || pathname.startsWith("/auth/") || embedded || nativeMobile) return children;
 
   return (
     <div className={`app-viewport${view ? ` app-viewport--${view}` : ""}${controlsHidden ? " app-viewport--controls-hidden" : ""}`}>

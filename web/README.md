@@ -82,6 +82,28 @@ The public product website lives at `/`; **Open app** leads to `/welcome`.
 The welcome drawer supports email/password sign-in or sign-up and Google OAuth;
 GitHub is not currently offered. Required fields, provider failures, and account
 errors keep the user in the drawer rather than advancing onboarding.
+Successful sign-in returns through `/auth/continue`. Returning accounts open
+caregiver Home directly; accounts that finish receiver setup open My Day.
+New Google accounts and email sign-ups still receive onboarding, and unfinished
+setup remains resumable. Finishing setup saves a routing-only completion flag
+and role in Supabase user metadata plus an account-ID-scoped browser marker.
+Older accounts without a completion flag default to caregiver Home on sign-in
+instead of repeating onboarding. Generic demo setup is never used to mark a
+different account complete. These flags do not grant household membership or
+operational API access, and do not synchronize the browser's care setup data.
+`/account` provides an **Open CareSignal** action for existing sessions.
+
+In Supabase Authentication → URL Configuration, allow each app origin's
+`/auth/callback` (including the `next=recovery` query string), e.g. an appropriately scoped
+`https://your-app-host/auth/callback**`, and use the deployed app as Site URL.
+Add the current HTTPS tunnel callback separately when testing phones. If Supabase
+falls back to Site URL with an OAuth `code` or provider error, the website root
+forwards it to the callback instead of displaying the marketing page.
+PKCE still requires finishing sign-in on the same origin/browser that started
+it; a missing redirect allowlist entry cannot be repaired by forwarding a code
+from one origin to another. Google itself should redirect to Supabase's
+`/auth/v1/callback`, not directly to the app. Password recovery retains its
+dedicated update-password screen. Auth continuation runs outside device previews.
 Sign out is available in the caregiver Home profile and Settings account section.
 It ends the account session on this device and clears shared caregiver access,
 then returns to Welcome without deleting saved setup or care records.
