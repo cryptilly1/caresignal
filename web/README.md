@@ -79,6 +79,8 @@ its existing multi-card layout. Phone role selection
 remains a scrollable carousel. The desktop layout hides decorative phone chrome.
 Onboarding actions use the same feathered glass blur as the logged-in navigation;
 content scrolls underneath, with bottom padding keeping the last fields reachable.
+The top scroll edge fades gently, headings stay white at every viewport size,
+and a subtle dark-blue footer tint keeps the secondary action readable.
 The website has separate entry
 points for the care circle, receiver, DoorSense, camera, voice, and audio tools.
 Web mode spans the browser width; its welcome screen fills the space below the

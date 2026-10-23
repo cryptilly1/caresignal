@@ -2017,7 +2017,7 @@ a {
   border: 0;
   padding: 0;
   background: none;
-  color: #167368;
+  color: var(--cs-color-brand-primary);
   cursor: pointer;
   font: inherit;
   font-size: 14px;
@@ -6011,11 +6011,6 @@ button.care-chip::after,
     width: 100%;
   }
 
-  .onboarding-flow .onboarding-role-heading,
-  .onboarding-flow .onboarding-wizard-heading h1 {
-    color: #fff;
-  }
-
   .onboarding-flow .onboarding-form-stack,
   .onboarding-flow .onboarding-profile-card,
   .onboarding-flow .receiver-stack {
@@ -6069,9 +6064,24 @@ button.care-chip::after,
   background: none;
 }
 
+.onboarding-flow .onboarding-role-heading,
+.onboarding-flow .onboarding-wizard-heading h1 {
+  color: #fff;
+}
+
 .onboarding-flow > .onboarding-body {
   margin-bottom: 0;
   scroll-padding-bottom: calc(var(--onboarding-footer-height) + 24px);
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 24px);
+  mask-image: linear-gradient(180deg, transparent, #000 24px);
+}
+
+.onboarding-flow > .onboarding-body--wizard {
+  padding-top: 24px;
+}
+
+.onboarding-flow > .onboarding-body--roles {
+  padding-top: 24px;
 }
 
 .onboarding-flow > .onboarding-body::after {
@@ -6089,9 +6099,18 @@ button.care-chip::after,
   backdrop-filter: none;
 }
 
+.onboarding-flow > .onboarding-footer::before {
+  background: linear-gradient(
+    0deg,
+    rgba(2, 36, 70, 0.42),
+    rgba(34, 84, 126, 0.18) 55%,
+    rgba(236, 246, 255, 0.08)
+  );
+}
+
 .onboarding-flow .onboarding-sign-in,
 .onboarding-flow .onboarding-footer__unavailable {
-  color: #12334f;
+  color: var(--cs-color-text-on-dark);
 }
 
 .onboarding-footer__single {
