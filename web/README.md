@@ -76,6 +76,8 @@ Caregiver and receiver onboarding have wide layouts above 760px: the role picker
 shows both choices together, early forms place the heading beside the fields,
 and later setup keeps its existing multi-card layout. Phone role selection
 remains a scrollable carousel. The desktop layout hides decorative phone chrome.
+Onboarding actions use the same feathered glass blur as the logged-in navigation;
+content scrolls underneath, with bottom padding keeping the last fields reachable.
 The website has separate entry
 points for the care circle, receiver, DoorSense, camera, voice, and audio tools.
 Web mode spans the browser width; its welcome screen fills the space below the
