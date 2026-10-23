@@ -80,7 +80,7 @@ access and configured devices; a simulation does not validate a real Ring stream
 
 DoorSense, its My Day card, and both live-assist and call-preview controls share
 a scoped type and shape scale: 16px action labels, 14px supporting copy,
-13px status text, 24px cards, and 16px control corners. Actions remain at least
+13px status text, 24px cards, pill-shaped action buttons, and 16px media/control corners. Actions remain at least
 48px high (56px for receiver response rows); icon-only call controls have 44px
 targets. Text can wrap and grow instead of being forced onto one line. Headings
 stay proportionate across screen sizes, video frames preserve their proportions,
@@ -88,7 +88,7 @@ and empty-camera views grow for larger text. Primary/help controls use
 higher-contrast blue/red fills; leave/cancel actions have a separate soft-red
 treatment. These styles do not change camera permissions, sharing, or call logic.
 All shared choice drawers use compact close icons inside 44px targets, 20px
-headings, wrapping 16px action labels, and consistent fields and supporting copy.
+headings, pill-shaped buttons with wrapping 16px action labels, and consistent fields and supporting copy.
 Their headers remain visible while long content scrolls; keyboard focus stays
 inside the drawer and returns to its trigger on close. The sound drawer uses
 dedicated volume sliders, not text-field styling: 6px tracks, 22px thumbs,

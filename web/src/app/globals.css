@@ -896,7 +896,7 @@ a {
   min-width: 0;
   min-height: 48px;
   height: auto;
-  border-radius: 16px;
+  border-radius: var(--cs-radius-pill);
   padding: 12px 16px;
   font-size: 1rem;
   line-height: 1.4;
@@ -5022,7 +5022,7 @@ button.care-chip::after,
   min-width: 0;
   min-height: 48px;
   gap: 8px;
-  border-radius: var(--door-radius-control);
+  border-radius: var(--cs-radius-pill);
   padding: 12px 16px;
   font-size: var(--door-text-body);
   font-weight: 600;
@@ -5714,7 +5714,7 @@ body:has(.live-door-assist--popup:not([hidden])) .door-toast-layer[data-source="
   align-items: center;
   justify-content: flex-start;
   gap: 12px;
-  border-radius: var(--door-radius-control);
+  border-radius: var(--cs-radius-pill);
   padding: 12px 16px;
   text-align: left;
 }
