@@ -181,7 +181,7 @@ function ReceiverWizard({ initialView }: { initialView?: "day" }) {
   const headings: Record<ReceiverStep, string> = {
     intro: "Get support from your care circle members.",
     code: "Enter the code from your CareSignal invitation.",
-    review: "Check the details for your new household.",
+    review: "Check the details of your new care circle.",
     joined: "You’ve joined your family’s circle.",
     day: "My Day",
   };
@@ -263,7 +263,7 @@ function ReceiverWizard({ initialView }: { initialView?: "day" }) {
                 <span className="receiver-mail-icon"><ReceiverIcon name="mail-lock" /></span>
                 <span className="care-chip receiver-disconnected-chip">Not connected yet</span>
                 <h2>Your care circle members can invite you to join</h2>
-                <p className="care-body-copy">They can create an invitation from their household and share the code with you.</p>
+                <p className="care-body-copy">They can create an invitation from their care circle and share the code with you.</p>
               </section>
               <ReceiverNotice>You’re not connected yet. Check-ins and requests for help won’t be shared until you join your family’s circle.</ReceiverNotice>
             </>
@@ -309,7 +309,7 @@ function ReceiverWizard({ initialView }: { initialView?: "day" }) {
             <>
               <section className="care-card receiver-review-card">
                 <div className="care-card__heading">
-                  <h2>{setup.preferredName.trim().split(/\s+/)[0]}’s household</h2>
+                  <h2>{setup.preferredName.trim().split(/\s+/)[0]}’s care circle</h2>
                   <button className="care-text-button" onClick={() => { setDraftName(setup.preferredName); setEditing(true); }} type="button">Edit</button>
                 </div>
                 <ReceiverIdentity name={setup.preferredName} />

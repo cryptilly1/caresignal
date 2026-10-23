@@ -504,7 +504,7 @@ function OnboardingWizard() {
               {step === 4 && "Invite people you trust to your care circle."}
               {step === 5 && "Make a starting plan. It won’t be active until you finish setup."}
               {step === 6 && `Set a check-in time for ${recipientDisplayName}.`}
-              {step === 7 && "Check the details for your new household."}
+              {step === 7 && "Check the details of your new care circle."}
             </h1>
           </div>
 
@@ -531,7 +531,7 @@ function OnboardingWizard() {
                 <p>
                   <strong>You&apos;ll be the care lead.</strong>
                   <br />
-                  You manage household access, settings and connections. Care
+                  You manage care circle access, settings and connections. Care
                   is shared with your team.
                 </p>
               </div>

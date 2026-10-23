@@ -140,7 +140,7 @@ export function InviteMembers({
             <input autoComplete="email" onChange={(event) => setEmail(event.target.value)} placeholder="jamie@example.com" required type="email" value={email} />
           </label>
           <DrawerSelect<SetupMember["access"]> label="Access Level" onChange={setAccess} placeholder="Choose access level" value={access} options={[{ value: "member", label: "Care team member" }, { value: "lead", label: "Care lead" }]} />
-          <p className="care-body-copy">{access === "lead" ? "Can manage household access, settings and connections." : "Can share tasks and take duty or backup shifts. Can’t change household access or connections."}</p>
+          <p className="care-body-copy">{access === "lead" ? "Can manage care circle access, settings and connections." : "Can share tasks and take duty or backup shifts. Can’t change care circle access or connections."}</p>
           {error && <p className="care-error" role="alert">{error}</p>}
           <button className="cs-button cs-button--primary care-inline-button" type="submit">Send Invite</button>
         </form>
@@ -207,12 +207,12 @@ export function DutyPlan({ setup, onChange }: SetupStepProps) {
         <MemberRow member={{ name: caregiverLabel(setup), email: "Care lead" }}><span className="care-chip care-chip--blue">You</span></MemberRow>
         <SetupSelect label="Care shift" value={setup.dutyShift} options={["10:00 AM - 6:00 PM", "6:00 AM - 2:00 PM", "2:00 PM - 10:00 PM", "All day"]} onChange={(dutyShift) => onChange({ dutyShift, dutyEnabled: true })} />
         <SetupSelect label="Repeat" value={setup.dutyRepeat} options={["Every day", "Weekdays", "Weekends"]} onChange={(dutyRepeat) => onChange({ dutyRepeat, dutyEnabled: true })} />
-        <p className="care-body-copy">Can share tasks and take duty or backup shifts. Can’t change household access or connections.</p>
+        <p className="care-body-copy">Can share tasks and take duty or backup shifts. Can’t change care circle access or connections.</p>
       </section>
       <section className="care-card care-backup-card">
         <h2>{joined.length ? "Backup responder on duty" : "Choose a backup"}</h2>
         {joined.map((member) => <MemberRow key={member.id} member={member}><span className="care-chip">Added</span></MemberRow>)}
-        <p className="care-body-copy">{joined.length ? "Can share tasks and take duty or backup shifts. Can’t change household access or connections." : "A backup is asked to help if the person on duty can’t respond."}</p>
+        <p className="care-body-copy">{joined.length ? "Can share tasks and take duty or backup shifts. Can’t change care circle access or connections." : "A backup is asked to help if the person on duty can’t respond."}</p>
         <button className="cs-button cs-button--primary care-inline-button" onClick={() => { setDraftBackupIds(setup.backupIds); setChoosingBackup(true); }} type="button" aria-haspopup="dialog" aria-expanded={choosingBackup}>
           <Image alt="" src="/images/care-circle/backup-plus.svg" height={20} width={20} /> Add a team member as backup
         </button>
@@ -272,7 +272,7 @@ export function HouseholdReview({ setup, onEdit }: { setup: CareSetup; onEdit: (
   return (
     <div className="care-stack">
       <section className="care-card care-review">
-        <div className="care-card__heading"><h2>{recipientLabel(setup)}’s household</h2><button className="care-text-button" onClick={() => onEdit(2)} type="button">Edit</button></div>
+        <div className="care-card__heading"><h2>{recipientLabel(setup)}’s care circle</h2><button className="care-text-button" onClick={() => onEdit(2)} type="button">Edit</button></div>
         <div className="care-member">
           <span className="care-member__avatar" style={{ background: colors[setup.profileColor] || colors.Amber }}><Image alt="" src={`/images/onboarding/${icons[setup.profileIcon] || icons.Sun}`} height={26} width={26} /></span>
           <span className="care-member__details"><strong>{setup.recipientName || recipientLabel(setup)}</strong><small>{setup.relationship || "Care recipient"}</small></span>
