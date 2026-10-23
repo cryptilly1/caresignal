@@ -101,7 +101,7 @@ export function DoorWatch() {
   const alerted = toast.alerted;
 
   return (
-    <div className="door-toast-layer">
+    <div className="door-toast-layer" data-source={toast.source}>
       <div
         className={`door-toast${alerted ? " door-toast--alert" : ""}`}
         role="status"

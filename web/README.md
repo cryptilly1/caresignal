@@ -87,9 +87,19 @@ stay proportionate across screen sizes, video frames preserve their proportions,
 and empty-camera views grow for larger text. Primary/help controls use
 higher-contrast blue/red fills; leave/cancel actions have a separate soft-red
 treatment. These styles do not change camera permissions, sharing, or call logic.
-The sound drawer keeps its compact close icon inside a 44px target and uses
+All shared choice drawers use compact close icons inside 44px targets, 20px
+headings, wrapping 16px action labels, and consistent fields and supporting copy.
+Their headers remain visible while long content scrolls; keyboard focus stays
+inside the drawer and returns to its trigger on close. The sound drawer uses
 dedicated volume sliders, not text-field styling: 6px tracks, 22px thumbs,
 visible percentages, keyboard focus, and native 5% volume steps.
+
+Real incoming Live Assist requests open in the floating DoorSense video panel.
+Minimize collapses it to a restore bar with live call status; it does not leave
+the call, stop the microphone, or remount the media elements. Video can expand
+within the panel and return to its regular size. Escape restores expanded video
+first, then minimizes the panel. Only explicit Leave/Cancel or connection cleanup
+ends the connection; the preview flow remains separately labelled.
 
 The public product website lives at `/`; **Open app** leads to `/welcome`.
 The welcome drawer supports email/password sign-in or sign-up and Google OAuth;

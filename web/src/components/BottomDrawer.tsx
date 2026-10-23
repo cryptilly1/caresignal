@@ -71,7 +71,7 @@ export function BottomDrawer({
       }
       if (event.key !== "Tab") return;
       const focusable = [...panel.querySelectorAll<HTMLElement>(
-        'button:not(:disabled), input:not(:disabled), select:not(:disabled), a[href], summary, [tabindex="0"]',
+        'button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), a[href], summary, [tabindex="0"]',
       )].filter((node) => node.getClientRects().length > 0);
       const first = focusable[0];
       const last = focusable[focusable.length - 1];

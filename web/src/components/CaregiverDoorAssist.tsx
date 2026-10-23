@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowUpRight, DoorOpen, MessageCircle, Mic, MicOff, PhoneOff, Video, X } from "lucide-react";
+import { ArrowUpRight, DoorOpen, Maximize2, MessageCircle, Mic, MicOff, Minimize2, Minus, PhoneOff, Video, X } from "lucide-react";
 import { DOOR_LIVE_ICE } from "@/lib/webrtc-ice";
 import type { SignalPayload } from "@/lib/door-live-server";
 import { useStore } from "@/lib/store";
@@ -29,6 +29,14 @@ export function CaregiverDoorAssist({ hideIdle = false }: { hideIdle?: boolean }
   const [error, setError] = useState("");
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [elapsed, setElapsed] = useState(0);
+  const [minimizedRequest, setMinimizedRequest] = useState<string | null>(null);
+  const [expandedRequest, setExpandedRequest] = useState<string | null>(null);
+  const activeId = active?.id ?? null;
+  const minimized = activeId !== null && minimizedRequest === activeId;
+  const videoExpanded = activeId !== null && expandedRequest === activeId;
+  const panelRef = useRef<HTMLElement>(null);
+  const miniRef = useRef<HTMLButtonElement>(null);
+  const expandRef = useRef<HTMLButtonElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const bellAudioRef = useRef<HTMLAudioElement>(null);
   const peerRef = useRef<RTCPeerConnection | null>(null);
@@ -45,6 +53,17 @@ export function CaregiverDoorAssist({ hideIdle = false }: { hideIdle?: boolean }
   const ownership = linkedAlert?.status === "acknowledged"
     ? linkedAlert.ownerId === state.currentUserId ? "Owned by you" : `Owned by ${state.members.find(member => member.id === linkedAlert.ownerId)?.name ?? "your caregiver"}`
     : "On call: You";
+
+  useEffect(() => {
+    if (!activeId) return;
+    if (minimized) miniRef.current?.focus({ preventScroll: true });
+    else panelRef.current?.focus({ preventScroll: true });
+  }, [activeId, minimized]);
+
+  function minimize() {
+    setExpandedRequest(null);
+    setMinimizedRequest(activeId);
+  }
 
   const stop = useCallback(async () => {
     generation.current++;
@@ -109,6 +128,7 @@ export function CaregiverDoorAssist({ hideIdle = false }: { hideIdle?: boolean }
     await stop().catch(cause => setError(cause.message));
     const attempt = ++generation.current;
     setPhase("connecting");
+    panelRef.current?.focus({ preventScroll: true });
     setError("");
     try {
       let live = await signal();
@@ -244,16 +264,32 @@ export function CaregiverDoorAssist({ hideIdle = false }: { hideIdle?: boolean }
 
   if (!active && hideIdle) return null;
   const duration = `${Math.floor(elapsed / 60)}:${String(elapsed % 60).padStart(2, "0")}`;
-  return <section className="care-card live-door-assist simulation-live" aria-label="Live door assist">
-    <header className="live-door-assist__header"><span><DoorOpen aria-hidden="true" size={21} />DoorSense</span><span>Live door assist</span><button aria-label="Dismiss live assist" type="button" onClick={() => {
+  return <>
+    {active && minimized && <button ref={miniRef} className="live-door-assist-mini home-glass" aria-label="Restore Live door assist" type="button" onClick={() => setMinimizedRequest(null)}>
+      <DoorOpen aria-hidden="true" size={24} />
+      <span><strong>{phase === "connected" ? `Helping ${recipient} · ${duration}` : phase === "connecting" ? `Connecting to ${recipient}` : `${recipient} needs door help`}</strong><small>{error || (phase === "connected" ? micOn ? "Microphone on · Call continues" : "Microphone muted · Call continues" : "Open Live door assist")}</small></span>
+      <Maximize2 aria-hidden="true" size={20} />
+    </button>}
+    <section ref={panelRef} tabIndex={-1} hidden={!!active && minimized} className={`care-card live-door-assist simulation-live${active ? " live-door-assist--popup" : ""}${videoExpanded ? " live-door-assist--expanded" : ""}`} aria-label="Live door assist" onKeyDown={event => {
+      if (event.key !== "Escape" || !active) return;
+      event.stopPropagation();
+      if (videoExpanded) {
+        setExpandedRequest(null);
+        expandRef.current?.focus({ preventScroll: true });
+      } else minimize();
+    }}>
+    <header className="live-door-assist__header"><span className="door-help-label"><DoorOpen aria-hidden="true" size={21} />DoorSense</span><span>Live door assist</span>
+      {active && <button aria-label="Minimize live assist" className="door-icon-button" type="button" onClick={minimize}><Minus aria-hidden="true" size={20} /></button>}
+      {phase === "waiting" && <button aria-label="Dismiss live assist" className="door-icon-button" type="button" onClick={() => {
       if (active) dismissed.current.add(active.id);
       dismissed.current.add(`session-${offeredSessionRef.current}`);
       void stop().catch(cause => setError(cause.message));
       setActive(null);
-    }}><X aria-hidden="true" size={18} /></button></header>
+    }}><X aria-hidden="true" size={18} /></button>}</header>
     <h2>{phase === "connected" ? `Helping ${recipient}` : phase === "connecting" ? `Connecting to ${recipient}` : active ? `${recipient} needs door help` : "Ready for door help"}</h2>
     <div className="live-door-assist__state"><span className={`care-chip${phase === "connected" ? " care-chip--blue" : " care-chip--pending"}`}>{phase === "connected" ? `Connected · ${duration}` : phase === "connecting" ? "Connecting..." : "Waiting for you to join"}</span><span>{phase === "connected" ? ownership : "Not connected"}</span></div>
     <div className="live-door-assist__video">
+      {active && <button ref={expandRef} aria-label={videoExpanded ? "Restore video size" : "Expand live video"} aria-expanded={videoExpanded} className="door-video__expand" type="button" onClick={() => setExpandedRequest(videoExpanded ? null : activeId)}>{videoExpanded ? <Minimize2 aria-hidden="true" size={18} /> : <Maximize2 aria-hidden="true" size={18} />}</button>}
       {phase === "waiting" && <DoorCameraPreview />}
       <video hidden={phase === "waiting"} ref={videoRef} autoPlay playsInline aria-label="Live receiver-shared door view" onLoadedData={() => setVideoReady(true)} onClick={event => {
         void event.currentTarget.play().catch(() => setError("Allow media playback in your browser."));
@@ -276,5 +312,6 @@ export function CaregiverDoorAssist({ hideIdle = false }: { hideIdle?: boolean }
     </div>
     <Link className="live-door-assist__alert" href={linkedAlert ? `/alerts/${linkedAlert.id}` : "/escalation"}><span><strong>Open door-help alert</strong><small>{linkedAlert?.title ?? active?.label ?? "Care alerts stay open until cleared"}</small></span><ArrowUpRight aria-hidden="true" size={19} /></Link>
     <p className="settings-note">Joining requests microphone access. Leaving stops your microphone, not the phone camera or the care alert. A visitor hears you only when their doorbell speaker is connected.</p>
-  </section>;
+  </section>
+  </>;
 }
