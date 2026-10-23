@@ -13,6 +13,7 @@ import { StatusBar, inter, jakarta } from "./OnboardingFlow";
 import { BrandMark } from "./BrandMark";
 import {
   DEMO_INVITE_CODE,
+  DEMO_INVITER_NAME,
   RECEIVER_SETUP_KEY,
   emptyReceiverSetup,
   normalizeInviteCode,
@@ -52,13 +53,13 @@ function ReceiverIdentity({ name, joined = false }: { name: string; joined?: boo
   );
 }
 
-function Inviter({ showEmail = false }: { showEmail?: boolean }) {
+function Inviter() {
   return (
     <div className="care-member">
-      <span aria-hidden="true" className="care-member__avatar">EM</span>
+      <span aria-hidden="true" className="care-member__avatar">{initials(DEMO_INVITER_NAME)}</span>
       <span className="care-member__details">
-        <strong>Elias Morgan</strong>
-        <small>{showEmail ? "elias.morgan@example.com" : "Care lead · Invited you."}</small>
+        <strong>{DEMO_INVITER_NAME}</strong>
+        <small>Care lead · Invited you.</small>
       </span>
     </div>
   );
@@ -125,7 +126,7 @@ function ReceiverWizard({ initialView }: { initialView?: "day" }) {
     if (step === "intro") goTo("code");
     if (step === "code") {
       if (!validCode) {
-        setCodeError("This preview only recognizes the demo invitation CS-7K4M. Real invitation lookup is not connected yet.");
+        setCodeError(`That code wasn't recognized. Use demo code ${DEMO_INVITE_CODE} to continue.`);
         codeInputRef.current?.focus();
         return;
       }
@@ -223,7 +224,7 @@ function ReceiverWizard({ initialView }: { initialView?: "day" }) {
   );
 
   return (
-    <main className={`onboarding-screen receiver-screen ${inter.variable} ${jakarta.variable}`}>
+    <main className={`onboarding-screen onboarding-flow receiver-screen ${inter.variable} ${jakarta.variable}`}>
       <StatusBar />
       <header className="onboarding-wizard-header">
         <Link aria-label="Return to CareSignal home" className="onboarding-wizard-home" href="/"><BrandMark centered /></Link>
@@ -274,12 +275,12 @@ function ReceiverWizard({ initialView }: { initialView?: "day" }) {
                     {validCode && <Image alt="Demo invitation recognized" height={20} src="/images/care-circle/backup-check.svg" width={20} />}
                   </span>
                 </label>
-                <p className="care-body-copy" id="receiver-code-hint">Find this in the invitation message from your family.</p>
+                <p className="care-body-copy" id="receiver-code-hint">You&apos;re invited by <strong>{DEMO_INVITER_NAME}</strong>. Use demo code <strong>{DEMO_INVITE_CODE}</strong> to join.</p>
                 {codeError && <p className="care-error" id="receiver-code-error" role="alert">{codeError}</p>}
                 {validCode && (
                   <div aria-live="polite" className="receiver-inviter">
                     <p className="receiver-section-label">Invited by</p>
-                    <Inviter showEmail />
+                    <Inviter />
                   </div>
                 )}
               </form>

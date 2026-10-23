@@ -57,7 +57,7 @@ demo and account sign-in before its separate live-household operator controls.
 ## Designed onboarding preview
 
 The public product website lives at `/`; **Open app** leads to `/welcome`.
-Desktop app routes include a Web/Mobile viewport switch. Mobile simulates an
+Desktop app routes include a Web/Mobile/Tablet viewport switch. Mobile simulates an
 iPhone 16 Pro using a 402 x 874 CSS-pixel iframe inside a device frame, so media
 queries and fixed controls behave as on a phone, without a Dynamic Island overlay.
 Use Hide to dismiss the preview toolbar and Show controls to restore it; the
@@ -67,6 +67,15 @@ Viewports 760px and narrower
 render the responsive app directly, without a simulator, iframe, or preview
 toolbar, even if a desktop Mobile preference was saved. Resizing back restores
 the desktop preference. Neither mode changes household authorization.
+Tablet uses an Amazon Fire-style landscape frame around a 960 x 600 CSS-pixel
+viewport. This is a browser layout preview, not a Fire OS or Vega emulator.
+Device frames scale to available desktop width without changing the iframe's
+internal viewport; actual phones still render the responsive app directly.
+The shared preview frame name keeps provider sign-in outside both simulators.
+Caregiver and receiver onboarding have wide layouts above 760px: the role picker
+shows both choices together, early forms place the heading beside the fields,
+and later setup keeps its existing multi-card layout. Phone role selection
+remains a scrollable carousel. The desktop layout hides decorative phone chrome.
 The website has separate entry
 points for the care circle, receiver, DoorSense, camera, voice, and audio tools.
 Web mode spans the browser width; its welcome screen fills the space below the
@@ -169,9 +178,11 @@ Escape/tap-outside dismissal, and focus restored to the trigger.
 Selecting **I receive support** opens `/onboarding/receiver`: an unconnected
 state, invitation-code entry, household review with explicit Accept & Join,
 and an optional daily reminder. Use the clearly labelled demo code `CS-7K4M`
-to preview the supplied household; arbitrary codes never resolve to a household.
-On-screen demo helper copy is omitted to match the designs; enter the code
-manually. This does not enable a live invitation or reminder service.
+to preview the supplied household, invited by **Elias Aderemi**; arbitrary codes
+never resolve to a household. The code and inviter name appear below the entry
+field and in the invitation review. The receiver's profile is kept separate.
+This does not enable a live invitation or reminder service, and no code-request
+feature is provided yet.
 Invitation links can open `/onboarding/receiver?code=CS-7K4M`. Checking a code
 does not save joining consent. The reminder has no default selection; accepting,
 declining, or skipping is the receiver's choice.

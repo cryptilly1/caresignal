@@ -99,11 +99,10 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
           <Link className="cs-button cs-button--primary" href="/care-circle?view=activity&demo=1">Continue with demo <ArrowUpRight size={18} /></Link>
           <Link className="cs-button cs-button--glass" href="/welcome">Sign in to your account</Link>
         </div>
-        <p className="access-note">The demo uses example information and needs no password. Account sign-in does not yet grant live household access.</p>
-        <details className="access-operator">
-          <summary>{status.configured ? "Live household access" : "About this live household"}</summary>
-          <p>Live camera and household tools use separate operator access while household membership is being connected.</p>
-          {!status.configured ? <p className="access-notice" role="alert">{status.error ?? "Live household access has not been configured."}</p> : <form onSubmit={submit} className="access-form">
+        {status.error && <p className="access-error" role="alert">We couldn&apos;t open this household. Please try again later.</p>}
+        {status.configured && <details className="access-operator">
+          <summary>Live household access</summary>
+          <form onSubmit={submit} className="access-form">
             <label className="onboarding-field" htmlFor="caregiver-password"><span>Household password</span>
             <input
               id="caregiver-password"
@@ -126,8 +125,8 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
             >
               {submitting ? "Opening..." : "Open live household"}
             </button>
-          </form>}
-        </details>
+          </form>
+        </details>}
       </section>
     </main>
   );

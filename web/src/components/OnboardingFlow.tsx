@@ -254,7 +254,7 @@ function OnboardingWizard() {
   function keepRoleCardVisible(roleIndex: number) {
     const track = roleTrackRef.current;
     const card = roleCardRefs.current[roleIndex];
-    if (!track || !card) return;
+    if (!track || !card || track.scrollWidth <= track.clientWidth) return;
 
     const trackBounds = track.getBoundingClientRect();
     const cardBounds = card.getBoundingClientRect();
@@ -280,7 +280,7 @@ function OnboardingWizard() {
 
   function updateRoleFromCarousel() {
     const track = roleTrackRef.current;
-    if (!track) return;
+    if (!track || track.scrollWidth <= track.clientWidth) return;
     const trackCenter =
       track.getBoundingClientRect().left + track.clientWidth / 2;
     const nearestIndex = roleCardRefs.current.reduce(
@@ -380,7 +380,7 @@ function OnboardingWizard() {
     profileIcons.find((icon) => icon.label === profileIcon) ?? profileIcons[0];
 
   return (
-    <main className={`onboarding-screen ${inter.variable} ${jakarta.variable}`}>
+    <main className={`onboarding-screen onboarding-flow ${inter.variable} ${jakarta.variable}`}>
       <StatusBar />
 
       {step === 0 ? (
@@ -433,7 +433,7 @@ function OnboardingWizard() {
       {step === 0 ? (
         <div className="onboarding-body onboarding-body--roles" ref={bodyRef}>
           <h1 className="onboarding-role-heading">
-            How will you use
+            How will you use{" "}
             <br />
             Care Signal?
           </h1>

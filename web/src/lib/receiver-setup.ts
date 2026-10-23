@@ -1,5 +1,6 @@
 export const RECEIVER_SETUP_KEY = "caresignal-receiver-v1";
 export const DEMO_INVITE_CODE = "CS-7K4M";
+export const DEMO_INVITER_NAME = "Elias Aderemi";
 
 export type ReceiverSetup = {
   joined: boolean;

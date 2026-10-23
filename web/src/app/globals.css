@@ -5921,6 +5921,95 @@ button.care-chip::after,
   }
 }
 
+@media (min-width: 761px) {
+  .onboarding-flow {
+    width: min(960px, calc(100vw - 48px));
+    height: min(932px, calc(100dvh - var(--app-toolbar-height, 0px)));
+    min-height: min(600px, calc(100dvh - var(--app-toolbar-height, 0px)));
+  }
+
+  .onboarding-flow > .onboarding-status,
+  .onboarding-flow .onboarding-home-indicator {
+    display: none;
+  }
+
+  .onboarding-flow > .onboarding-role-header {
+    padding-inline: 40px;
+    margin-top: 24px;
+  }
+
+  .onboarding-flow > .onboarding-wizard-header {
+    margin-top: 28px;
+  }
+
+  .onboarding-flow .onboarding-body--roles {
+    padding: 24px 40px;
+  }
+
+  .onboarding-flow .onboarding-role-heading {
+    min-height: 0;
+    margin-bottom: 24px;
+    font-size: 38px;
+  }
+
+  .onboarding-flow .onboarding-role-heading br {
+    display: none;
+  }
+
+  .onboarding-flow .onboarding-role-track {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    overflow: visible;
+    margin: 0;
+  }
+
+  .onboarding-flow .onboarding-role-card {
+    width: 100%;
+    height: 350px;
+    min-width: 0;
+  }
+
+  .onboarding-flow .onboarding-role-card__image {
+    height: 170px;
+  }
+
+  .onboarding-flow .onboarding-body--wizard {
+    gap: 28px;
+    padding-inline: 40px;
+  }
+
+  .onboarding-flow .onboarding-wizard-heading {
+    min-height: 0;
+  }
+
+  .onboarding-flow .onboarding-body--wizard-step-1,
+  .onboarding-flow .onboarding-body--wizard-step-2,
+  .onboarding-flow .onboarding-body--wizard-step-3,
+  .onboarding-flow .receiver-body {
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    align-content: start;
+    align-items: start;
+  }
+
+  .onboarding-flow .onboarding-form-stack,
+  .onboarding-flow .onboarding-profile-card,
+  .onboarding-flow .receiver-stack {
+    min-width: 0;
+  }
+
+  .onboarding-flow .receiver-stack {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .onboarding-flow .onboarding-footer__single,
+  .onboarding-flow .onboarding-footer__actions {
+    max-width: 500px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .care-switch span {
     transition: none;

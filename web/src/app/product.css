@@ -133,11 +133,24 @@ body:has(> .app-viewport) { display: block; background: #eef5fb; }
 .app-viewport__show { position: fixed; z-index: 20; top: 10px; right: 16px; background: #fffffff0; border: 1px solid #d5e7f5; box-shadow: 0 3px 16px #193c5014; backdrop-filter: blur(12px); }
 .app-viewport__stage { min-height: calc(100dvh - var(--app-toolbar-height)); background: #f0f2f5; padding: 28px 12px 40px; color: #6e6e73; }
 .app-viewport__stage > p { max-width: 422px; display: flex; justify-content: space-between; font-size: 11px; margin: 0 auto 12px; }
-.app-viewport__device { position: relative; width: 422px; padding: 10px; margin: auto; border-radius: 62px; background: #17191b; box-shadow: inset 0 0 0 2px #a5a3a0, inset 0 0 0 5px #454442, 0 18px 60px #1d344b24; }
+.app-viewport__preview-host { width: 100%; }
+.app-viewport__device-space { position: relative; margin-inline: auto; }
+.app-viewport__device { position: relative; width: 422px; padding: 10px; transform-origin: top left; border-radius: 62px; background: #17191b; box-shadow: inset 0 0 0 2px #a5a3a0, inset 0 0 0 5px #454442, 0 18px 60px #1d344b24; }
 .app-viewport__device::before, .app-viewport__device::after { content: ""; position: absolute; width: 3px; border-radius: 3px; background: #666461; }
 .app-viewport__device::before { left: -2px; top: 172px; height: 62px; box-shadow: 0 76px #666461; }
 .app-viewport__device::after { right: -2px; top: 210px; height: 88px; }
 .app-viewport__frame { display: block; width: 402px; height: 874px; border: 0; border-radius: 52px; background: #eaf3fa; }
+.app-viewport__stage--tablet > p { max-width: 1008px; }
+.app-viewport__device--tablet { width: 1008px; height: 648px; padding: 24px; border-radius: 32px; background: #24272c; box-shadow: inset 0 0 0 2px #676d75, inset 0 0 0 5px #15171b, 0 18px 60px #1d344b24; }
+.app-viewport__device--tablet::before { left: auto; right: 106px; top: -2px; width: 50px; height: 3px; box-shadow: none; }
+.app-viewport__device--tablet::after { top: -2px; right: 48px; width: 28px; height: 3px; }
+.app-viewport__device--tablet .app-viewport__frame { width: 960px; height: 600px; border-radius: 10px; }
+.app-viewport__tablet-camera { position: absolute; top: 8px; left: calc(50% - 4px); width: 8px; height: 8px; border: 2px solid #434b58; border-radius: 50%; background: #0e151f; }
+@media (min-width: 761px) and (max-width: 900px) {
+  .app-viewport__brand > span:not(.onboarding-brand-mark), .app-viewport__brand > svg { display: none; }
+  .app-viewport__controls { gap: 6px; }
+  .app-viewport__switch button { padding-inline: 12px; }
+}
 .app-viewport__loading { min-height: 70vh; display: grid; place-items: center; color: #024480; background: #eff6fc; }
 .access-screen { display: flex; min-height: calc(100dvh - var(--app-toolbar-height, 0px)); align-items: center; justify-content: center; padding: 36px 20px; background: radial-gradient(ellipse at top, #f6fcff, #dfedf9); color: #12334f; font-family: var(--font-welcome-inter), Inter, sans-serif; }
 .access-card { display: flex; width: min(100%, 460px); flex-direction: column; gap: 22px; padding: 30px; border: 1px solid #ffffffd9; border-radius: 32px; background: #ffffffc9; box-shadow: 0 18px 64px #345b7e14, inset 0 1px 0 #fff; }
