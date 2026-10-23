@@ -26,7 +26,9 @@ function isLocalDevelopmentRequest(request: Request): boolean {
 }
 
 function appAuthConfig(request?: Request): AuthConfig {
-  if (request && isLocalDevelopmentRequest(request)) {
+  const temporaryDemo = process.env.NODE_ENV === "development" &&
+    process.env.CARESIGNAL_TEMPORARY_CAMERA_DEMO === "true";
+  if (temporaryDemo || (request && isLocalDevelopmentRequest(request))) {
     return { password: null, configured: true, required: false };
   }
   const password = process.env.CARESIGNAL_APP_PASSWORD?.trim() || null;

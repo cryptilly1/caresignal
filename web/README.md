@@ -56,6 +56,15 @@ demo and account sign-in before its separate live-household operator controls.
 
 ## Designed onboarding preview
 
+For a temporary phone-camera demonstration through an HTTPS tunnel, run
+`CARESIGNAL_TEMPORARY_CAMERA_DEMO=true npm run dev -- --port 3000`.
+This explicitly bypasses the shared caregiver password on the development server
+only; production/Netlify always retain their access checks. Treat the tunnel URL
+as private: anyone with it can access demo care and camera endpoints while this
+mode is enabled. Use sample data, end camera sharing after testing, and restart
+without the flag to restore tunnel authentication. It does not bypass the MCP
+token or Google sign-in.
+
 Caregiver Home has a play button beside the profile control. Its simulation
 drawer creates labelled, page-local care alerts, camera-motion events, receiver
 help requests, missed check-ins, and missed visits. Test events can be owned or
