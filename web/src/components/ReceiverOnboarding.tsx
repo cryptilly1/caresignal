@@ -190,8 +190,8 @@ function ReceiverWizard({ initialView }: { initialView?: "day" }) {
           </section>
           <section className="care-card receiver-setup-day__circle">
             <div className="care-card__heading"><h2>Your care circle</h2><button className="care-text-button" onClick={() => setDaySheet("circle")} type="button">View <ChevronRight aria-hidden="true" size={16} /></button></div>
-            {setup.joined ? <div className="settings-inset"><Inviter /><span className="care-chip">Demo member</span></div> : <div className="settings-inset receiver-setup-day__empty"><span className="receiver-setup-day__icon"><Users aria-hidden="true" size={24} /></span><div><strong>A little support, together</strong><p>Use your family’s invitation to connect.</p></div></div>}
-            <p>{setup.joined ? "Elias is the care lead shown in your demo invitation." : "Your care circle will appear here once you join."}</p>
+            {setup.joined ? <div className="settings-inset"><Inviter /></div> : <div className="settings-inset receiver-setup-day__empty"><span className="receiver-setup-day__icon"><Users aria-hidden="true" size={24} /></span><div><strong>A little support, together</strong><p>Use your family’s invitation to connect.</p></div></div>}
+            <p>{setup.joined ? "Elias Aderemi invited you to this care circle." : "Your care circle will appear here once you join."}</p>
           </section>
           <section className="care-card receiver-setup-day__next">
             <div className="care-card__heading"><h2>Your next steps</h2></div>

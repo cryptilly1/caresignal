@@ -6341,8 +6341,14 @@ button.care-chip::after,
 }
 
 .receiver-setup-day .receiver-setup-day__body {
+  display: flex;
+  flex-direction: column;
   gap: 24px;
-  padding: 24px 24px 140px;
+  padding: 134px 24px 140px;
+}
+
+.receiver-setup-day__body > * {
+  flex-shrink: 0;
 }
 
 .account-screen .account-screen__body {
