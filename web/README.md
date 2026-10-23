@@ -69,6 +69,9 @@ The public product website lives at `/`; **Open app** leads to `/welcome`.
 The welcome drawer supports email/password sign-in or sign-up and Google OAuth;
 GitHub is not currently offered. Required fields, provider failures, and account
 errors keep the user in the drawer rather than advancing onboarding.
+Sign out is available in the caregiver Home profile and Settings account section.
+It ends the account session on this device and clears shared caregiver access,
+then returns to Welcome without deleting saved setup or care records.
 Desktop app routes include a Web/Mobile/Tablet viewport switch. Mobile simulates an
 iPhone 16 Pro using a 402 x 874 CSS-pixel iframe inside a device frame, so media
 queries and fixed controls behave as on a phone, without a Dynamic Island overlay.

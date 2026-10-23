@@ -9,6 +9,7 @@ import { inter, jakarta, StatusBar } from "./OnboardingFlow";
 import { CareHomeFooter, CareHomeHeader } from "./CareHomeChrome";
 import { BottomDrawer } from "./BottomDrawer";
 import { CaregiverLiveWatchers, CaregiverSimulations } from "./CaregiverSimulations";
+import { SignOutButton } from "./SignOutButton";
 import { CARE_SETUP_KEY, caregiverLabel, initials, parseCareSetup, recipientLabel } from "@/lib/care-setup";
 import {
   emptyHomePreview, formatCallDuration, HOME_PREVIEW_KEY, parseHomePreview,
@@ -291,6 +292,7 @@ export function CaregiverActivityHome() {
           {drawer === "profile" && <>
             <p className="care-body-copy">Design preview · The activity, visitor image and call states here are sample data. Actions are saved only on this device, separate from your operational household.</p>
             <Link className="care-text-button" href="/onboarding?step=1">Edit your profile</Link>
+            <SignOutButton />
             <button className="cs-button cs-button--primary care-inline-button" onClick={() => openDoor()} type="button">Preview help request</button>
             <button className="cs-button cs-button--glass care-inline-button" onClick={() => openDoor("visitor")} type="button">Preview visitor alert</button>
             <button className="care-text-button" onClick={() => { if (persist(emptyHomePreview)) { setDrawer(null); setCallStarted(null); setMuted(false); setDoorOpen(false); setMessage("Home activity preview reset."); } }} type="button">Reset preview activity</button>

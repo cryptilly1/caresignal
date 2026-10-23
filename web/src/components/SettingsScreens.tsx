@@ -11,6 +11,7 @@ import { CareHomeFooter, CareHomeHeader } from "./CareHomeChrome";
 import { CaregiverDoorAssist } from "./CaregiverDoorAssist";
 import { CameraConnectButton } from "./CameraConnectButton";
 import { RingStreamPreview } from "./RingStreamPreview";
+import { SignOutButton } from "./SignOutButton";
 import { inter, jakarta, StatusBar } from "./OnboardingFlow";
 import { currentBackup, currentOnDuty, memberById, now, quietByLabel, uid, visitorRepeatLabel } from "@/lib/engine";
 import { useStore } from "@/lib/store";
@@ -300,7 +301,7 @@ export function SettingsScreens() {
 }
 
 function AccountNotice() {
-  return <p className="care-body-copy">Individual account sign-in isn’t connected yet. Current access uses the shared caregiver session; demo member names are not verified identities.</p>;
+  return <div className="settings-form"><p className="care-body-copy">Manage your CareSignal login. Care-circle membership and permissions remain separate from your account. Signing out does not delete saved care setup or shared care records.</p><Link className="care-text-button" href="/account">Manage account</Link><SignOutButton /></div>;
 }
 
 function DutyEditor({ onDuty, backup, members, onSave }: { onDuty: MemberId; backup: MemberId; members: DrawerChoice<MemberId>[]; onSave: (onDuty: MemberId, backup: MemberId) => void }) {
