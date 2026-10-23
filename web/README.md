@@ -69,8 +69,12 @@ Caregiver Home has a play button beside the profile control. Its simulation
 drawer creates labelled, page-local care alerts, camera-motion events, receiver
 help requests, missed check-ins, and missed visits. Test events can be owned or
 cleared without modifying shared care records, camera settings, or receiver
-requests. They disappear on navigation/reload. Shared alerts appear separately;
-household polling, phone-camera sightings, Ring sync, and live door assist stay
+requests. They disappear on navigation/reload. Shared alerts appear separately
+in a notification stack below the overview: expand it or dismiss one/all without
+clearing the underlying care. Care alerts has a confirmed **Clear all** action
+covering pending and accepted alerts; it retains timelines and follow-up tasks
+and does not clear alerts arriving after the confirmation was opened.
+Household polling, phone-camera sightings, Ring sync, and live door assist stay
 mounted while the simulation drawer is open. Live feeds still require operational
 access and configured devices; a simulation does not validate a real Ring stream.
 
@@ -131,8 +135,25 @@ QR codes are generated locally, contain only the supplied HTTPS origin plus
 an HTTPS tunnel address pointing at the same running server;
 localhost is not a usable phone link. The hosted site is a separate server,
 not a way to join a local household session. The phone must pass the
-existing household gate where enabled. Its motion events do not make it the
-receiver's DoorSense video source.
+existing household gate where enabled. Its video is a separate phone feed;
+motion does not open the receiver's own camera or microphone.
+
+`/cam` opens the phone door-camera screen. **Start watching** explicitly opens
+video only. The watching/off/person-present states and Controls sheet use the
+supplied camera designs, adapted to CareSignal blue. Controls switches the
+front/rear camera, mirrors this phone's preview, and sends a labelled **Test**
+notification; tests never create care alerts or visitor prompts. Person detection
+runs in the phone browser; ordinary detections also update the shared DoorSense
+prompt.
+
+The protected `/api/door-camera` channel negotiates separate receive-only WebRTC
+peers for up to 12 viewers of one phone. Receiver My Day, DoorSense and the
+caregiver door panel show the actual phone view, not a visitor photograph, and
+only label it live once connected. Previewing requests no viewer microphone.
+Stopped cameras show an inactive state; changing cameras reconnects viewers.
+Publisher/viewer leases expire after 30 seconds without a heartbeat. Signaling
+is still single-process memory: use the same running local server via HTTPS
+tunnel for this temporary demonstration, not multi-instance Netlify deployment.
 
 Settings → Connect Ring also offers a live-view panel backed by the existing
 authenticated Ring WHEP endpoint. Save a valid Playground token first.
@@ -242,19 +263,20 @@ The setup-ready home at `/care-circle` is preserved and links to this view.
 The elongated Figma home is rendered as natural content within a scrolling
 viewport, with a fixed glass navigation bar and a wider desktop layout.
 
-Open the door-help alert to view the large request card, then Join call to
-inspect its connected state. Mute, minimize/reopen, expand video, decline and
-leave are local UI interactions; the original Figma visitor photo is a still,
-marked PREVIEW. No camera or microphone is opened, and no audio is captured or
-transmitted. Leaving or declining a call does not clear the alert. Clear removes
+Open the sample door-help alert to inspect its local call-controls preview.
+Mute, minimize/reopen, expand, decline and leave remain explicitly labelled
+preview interactions; the image now shows the actual phone camera when watching,
+or an unavailable state when it is off. No local microphone is opened by this
+panel. Real receiver sharing requests appear in the separate **Live door assist**
+card. Leaving or declining a preview does not clear the alert. Clear removes
 it from the open list but retains it in care history; taking ownership and
 clearing persist under `caresignal-home-preview-v1`, separate from live data.
 
 Profile options include a visitor-only scenario and Reset preview activity.
 Direct links support `&door=request`, `&door=visitor`, and `&door=connected`.
-All activity and device health in this view are Figma sample data, not monitoring
-results. The existing protected operational surfaces and camera services are
-unchanged. This screen's pastel background, glass summary tiles, inset cards,
+The overview activity and device health remain Figma sample data, not monitoring
+results; incoming shared alerts, live assist and the phone camera are operational.
+This screen's pastel background, glass summary tiles, inset cards,
 compact status labels, and door overlay define the visual reference for further
 screen refinements.
 
@@ -379,8 +401,10 @@ illustrative shift hours are not substituted for operational duty data.
 DoorSense remains directly below the four receiver Home tiles. Its inactive
 state is always rendered; recent door events switch it to a motion state for
 two minutes, with a View camera action into the existing DoorSense workflow.
-The card polls event metadata only: it does not capture media, auto-open a
-camera, claim the camera is live, or use a reference photograph as live video.
+The motion pill turns red, a six-second dismissible top notice appears, and the
+card connects to the phone's receive-only live view when available. It never
+opens the receiver's local camera or microphone for a preview or substitutes a
+reference photograph for live video.
 Loading and connection-error states are distinct from inactivity.
 
 ## DoorSense door view
@@ -390,11 +414,15 @@ camera and response cards sit side by side, with separate caregiver sound,
 visitor sound, and microphone controls beneath. On phones these cards stack.
 Quiet, visitor, waiting, connected/muted, confirmation, and error states use the
 existing door-event and WebRTC endpoints; no stock visitor image represents live
-footage. The current video source is explicitly labeled as the receiver device's
-camera stand-in, not a Ring video feed.
+footage. Door events from the phone and Ring Playground update the same visitor
+prompt, even when only the receiver screen is open. The video source is labelled
+as the phone door camera or an explicitly opened receiver-device stand-in, never
+as a Ring video feed.
 
 The quiet screen captures no media or door audio. A new door event less than two
-minutes old opens video only. Sharing requires an explicit caregiver/help action;
+minutes old opens the phone-camera view without requesting local media.
+The receiver can explicitly open their own camera if no phone is watching.
+Sharing requires an explicit caregiver/help action;
 the microphone stays muted while waiting and until explicitly enabled after a
 WebRTC connection is established. Urgent help is saved before asking for media
 permissions, so denied camera or microphone access does not block that request.
@@ -406,3 +434,16 @@ five-minute view timeout stops local camera/microphone tracks and door audio.
 Late permission results are stopped rather than reopening a closed view. Optional
 session IDs on publisher signaling prevent delayed cleanup or ICE from modifying
 a newer sharing session; existing signaling clients remain compatible.
+
+**Live door assist** uses the supplied waiting/connecting/connected designs in
+blue/glass styling. Its preview is receive-only; **Join** explicitly asks for
+the caregiver microphone and joins the receiver's camera/audio link. A connected
+caregiver may mute, leave and rejoin. Receiver microphone transmission remains
+off until the receiver enables it. The visitor speaker is linked separately
+through `/doorbell`, and is never claimed connected merely because the receiver
+call connected. Joining accepts an unowned door alert; existing ownership by
+another caregiver is displayed, not overwritten. Leaving keeps the care alert
+and phone watching session intact. Dummy audio and phone video are not proof of
+a successful live Ring-device stream.
+If the phone feed disconnects while being shared, receiver microphone and
+caregiver sharing stop instead of leaving a frozen picture labelled live.

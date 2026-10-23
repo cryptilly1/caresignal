@@ -10,6 +10,7 @@ import { CareHomeFooter, CareHomeHeader } from "./CareHomeChrome";
 import { BottomDrawer } from "./BottomDrawer";
 import { CaregiverLiveWatchers, CaregiverSimulations } from "./CaregiverSimulations";
 import { SignOutButton } from "./SignOutButton";
+import { DoorCameraPreview } from "./DoorCameraPreview";
 import { CARE_SETUP_KEY, caregiverLabel, initials, parseCareSetup, recipientLabel } from "@/lib/care-setup";
 import {
   emptyHomePreview, formatCallDuration, HOME_PREVIEW_KEY, parseHomePreview,
@@ -184,7 +185,6 @@ export function CaregiverActivityHome() {
           <p>{date}</p>
           <h1>Hello {greeting}.<br />It’s good to have you here.</h1>
         </header>
-        <CaregiverSimulations open={simulating} onClose={() => setSimulating(false)} />
         <section aria-label="Duty and household overview" className="home-overview">
           <div className="home-duty home-glass">
             <div><div className="home-duty__heading"><span>On Duty</span><Link href="/onboarding?step=5">Manage</Link></div><strong>You ·</strong><span>{initial.setup?.dutyShift ?? "10:00 AM until 6:00 PM"}</span></div>
@@ -208,8 +208,11 @@ export function CaregiverActivityHome() {
           </div>
         </section>
         <div className="caregiver-home__cards">
+          <CaregiverSimulations open={simulating} onClose={() => setSimulating(false)} />
           <section className="care-card home-open-alerts">
-            <div className="home-section-heading"><h2>Open care alerts</h2><button onClick={() => setDrawer("alerts")} type="button">View all · {openAlerts.length}</button></div>
+            <div className="home-section-heading"><h2>Open care alerts</h2><div className="home-section-actions">{openAlerts.length > 0 && <button onClick={() => {
+              if (persist({ ...activity, cleared: [...new Set([...activity.cleared, ...openAlerts.map(alert => alert.id)])] })) setMessage("Preview alerts cleared. Real care alerts are unchanged; history is retained.");
+            }} type="button">Clear all</button>}<button onClick={() => setDrawer("alerts")} type="button">View all · {openAlerts.length}</button></div></div>
             {openAlerts.map((alert) => renderAlert(alert))}
             {!openAlerts.length && <p className="care-body-copy">You’re all caught up. There are no open care alerts.</p>}
             <p className="home-footnote">No longer relevant? Clear it from the open list. The event stays in <button onClick={() => setDrawer("history")} type="button">care history</button>.</p>
@@ -258,18 +261,18 @@ export function CaregiverActivityHome() {
           </header>
           {connected && <div className="door-call-status"><span className="home-status">Connected · {formatCallDuration(seconds)}</span><span>On call: You{scenario === "help" ? `, ${recipient}` : ", Visitor"}</span></div>}
           <div className="door-video">
-            <Image alt="Visitor holding a parcel on the front porch — preview still image" className="door-video__image" fill priority sizes="(min-width: 900px) 480px, 100vw" src="/images/caregiver-home/visitor.png" />
-            <div className="door-video__top"><span className="door-video__live"><span />PREVIEW</span><button aria-label={videoExpanded ? "Close expanded video" : "Expand video"} className="door-video__expand" onClick={() => setVideoExpanded(!videoExpanded)} type="button"><HomeIcon name={videoExpanded ? "minimize" : "expand"} size={18} /></button></div>
-            <span className="door-video__caption">Front door · Ring · {connected ? "Call preview" : "Sound off"}</span>
+            <DoorCameraPreview />
+            <div className="door-video__top"><button aria-label={videoExpanded ? "Close expanded video" : "Expand video"} className="door-video__expand" onClick={() => setVideoExpanded(!videoExpanded)} type="button"><HomeIcon name={videoExpanded ? "minimize" : "expand"} size={18} /></button></div>
+            <span className="door-video__caption">Front door · Phone camera · Sound off</span>
           </div>
           {connected && (
             <div className="door-mic-notice">
               <span aria-hidden="true" className="door-waveform"><i /><i /><i /><i /><i /></span>
-              <span><strong>{muted ? "Your microphone is muted" : "Your microphone is on"}</strong><small>Call preview only. No audio is captured or sent.</small></span>
+              <span><strong>Call controls preview · microphone off</strong><small>No audio is captured or sent. Real requests use Live door assist on Home.</small></span>
             </div>
           )}
           <div className="door-help-panel__actions">
-            <button aria-pressed={connected ? muted : undefined} className="cs-button cs-button--primary" onClick={() => connected ? setMuted(!muted) : joinCall()} type="button"><HomeIcon name={connected ? "mute" : "video"} size={24} />{connected ? muted ? "Unmute" : "Mute" : "Join call"}</button>
+            <button aria-pressed={connected ? muted : undefined} className="cs-button cs-button--primary" onClick={() => connected ? setMuted(!muted) : joinCall()} type="button">            <HomeIcon name={connected ? "mute" : "video"} size={24} />{connected ? muted ? "Unmute preview" : "Mute preview" : "Preview call"}</button>
             <button className="cs-button cs-button--glass door-end-call" onClick={endCall} type="button"><HomeIcon name={connected ? "leave" : "decline"} size={24} />{connected ? "Leave call" : "Decline call"}</button>
           </div>
           {connected
@@ -288,9 +291,9 @@ export function CaregiverActivityHome() {
           {drawer === "logs" && renderMoments()}
           {drawer === "check-ins" && <><p className="care-body-copy">Three check-ins are shown in this design preview.</p><Link className="care-text-button" href="/onboarding?step=6">Manage check-in preferences</Link><p className="care-muted">No reminder notifications are scheduled by this preview.</p></>}
           {drawer === "circle" && <><p className="care-body-copy">Keep up with your household and care team.</p><Link className="care-text-button" href="/onboarding?step=4">Manage care team members</Link><Link className="care-text-button" href="/onboarding?step=7">Review your household</Link></>}
-          {drawer === "devices" && <><p className="care-body-copy">This design preview uses a still image, sample device health and local call controls. No camera or microphone is connected.</p><button className="cs-button cs-button--primary care-inline-button" onClick={() => openDoor("visitor")} type="button">Preview visitor alert</button><Link className="care-text-button" href="/setup">Open device setup</Link></>}
+          {drawer === "devices" && <><p className="care-body-copy">The door panel shows the live phone camera when watching is on. Device health and call controls here are samples; real receiver help appears in Live door assist.</p><button className="cs-button cs-button--primary care-inline-button" onClick={() => openDoor("visitor")} type="button">View front door</button><Link className="care-text-button" href="/setup">Open device setup</Link></>}
           {drawer === "profile" && <>
-            <p className="care-body-copy">Design preview · The activity, visitor image and call states here are sample data. Actions are saved only on this device, separate from your operational household.</p>
+            <p className="care-body-copy">Activity and call controls here are previews, separate from your operational care circle. The camera image is live only when the phone camera is watching. Real requests appear in Incoming care alerts and Live door assist.</p>
             <Link className="care-text-button" href="/onboarding?step=1">Edit your profile</Link>
             <SignOutButton />
             <button className="cs-button cs-button--primary care-inline-button" onClick={() => openDoor()} type="button">Preview help request</button>

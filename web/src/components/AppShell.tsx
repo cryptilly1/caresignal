@@ -14,6 +14,7 @@ import { AlexaWatch } from "./AlexaWatch";
 import { BottomNav } from "./BottomNav";
 import { CaregiverDoorAssist } from "./CaregiverDoorAssist";
 import { DoorWatch } from "./DoorWatch";
+import { RingBridge } from "./RingBridge";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -33,11 +34,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   if (pathname === "/setup" || pathname === "/escalation" || pathname === "/assignments" || pathname.startsWith("/alerts/")) {
-    return <><DoorWatch /><AlexaWatch />{children}</>;
+    return <><RingBridge headless /><DoorWatch /><AlexaWatch />{children}</>;
   }
 
   if (pathname === "/recipient" || pathname === "/doorsense") {
-    return <><AlexaWatch />{children}</>;
+    return <><RingBridge headless /><AlexaWatch />{children}</>;
   }
 
   // Full-bleed living-room overlay — no caregiver chrome / bottom nav
@@ -49,6 +50,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   if (isHome) {
     return (
       <div className="min-h-screen bg-[#c5d2c8]">
+        <RingBridge headless />
         <DoorWatch />
         <AlexaWatch />
         <div className="mx-auto min-h-screen w-full max-w-[430px] bg-[#E9EEE5]">
@@ -63,7 +65,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return (
       <div className="min-h-screen shell-caregiver">
         {/* Alerts + live assist if Mom escalates while you're on the chooser */}
-        <DoorWatch />
+        <RingBridge headless /><DoorWatch />
         <AlexaWatch />
         <div className="mx-auto max-w-[430px] px-4 pt-4">
           <CaregiverDoorAssist />
@@ -83,6 +85,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             : "shell-caregiver"
       }`}
     >
+      {!isCam && !isDoorbell && <RingBridge headless />}
       {!isReceiver && !isDoorbell && (
         <>
           <DoorWatch />

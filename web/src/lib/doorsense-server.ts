@@ -39,6 +39,7 @@ export function setDoorSensePending(input: {
   label: string;
   source?: string;
   id?: string;
+  announce?: boolean;
 }): DoorSensePending {
   const s = store();
   const pending: DoorSensePending = {
@@ -49,7 +50,7 @@ export function setDoorSensePending(input: {
   };
   s.pending = pending;
   // Caregiver Today (other device/tab) learns via DoorWatch poll
-  postDoorSighting({
+  if (input.announce !== false) postDoorSighting({
     label: `${pending.label} · waiting on DoorSense`,
     kind: "ding",
     liveAssist: false,

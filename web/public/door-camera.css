@@ -1,0 +1,50 @@
+body {
+  max-width: 760px;
+  min-height: 100svh;
+  padding: max(20px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+  color: #173a5b;
+  background: #dcefff url("/images/welcome/quiet-landscape.png") center / cover fixed;
+}
+body::before { position: fixed; inset: 0; z-index: -1; background: linear-gradient(#eaf5ffed, #e3f2f5d9); content: ""; }
+button { cursor: pointer; color: #024480; min-height: 48px; font: inherit; font-weight: 600; }
+button:focus-visible, a:focus-visible { outline: 3px solid #168ff1; outline-offset: 3px; }
+button:disabled { opacity: .55; cursor: wait; }
+button[hidden], [hidden] { display: none !important; }
+.camera-brand, .camera-heading, .camera-controls-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.camera-brand { padding: 10px 0 22px; font-size: 22px; }
+.camera-brand > span { display: flex; align-items: center; gap: 10px; }
+.camera-brand img { width: 32px; height: 32px; }
+.camera-brand small { font-size: 13px; }
+.camera-heading { margin-bottom: 10px; }
+.camera-heading h1 { font-size: 27px; }
+.camera-heading button { padding: 12px 16px; background: #ffffffc9; }
+.stage { width: 100%; max-height: none; height: min(65svh, 610px); aspect-ratio: auto; margin: 0; border-radius: 24px; border: 1px solid #c4dce9; background: #ffffff9c; }
+.stage video { position: absolute; inset: 0; }
+.off { color: #173a5b; background: transparent; display: flex; flex-direction: column; gap: 16px; font-size: 16px; line-height: 1.6; }
+.off strong { font-size: 30px; }
+.off svg { width: 80px; height: 80px; padding: 22px; border-radius: 50%; background: #e2edf6; }
+.camera-live-badge { display: none; position: absolute; top: 16px; left: 16px; padding: 8px 12px; border-radius: 24px; background: #073948db; color: white; font-size: 14px; }
+.stage.live .camera-live-badge { display: block; }
+.camera-presence { display: none; position: absolute; bottom: 0; left: 0; right: 0; padding: 64px 20px 24px; color: white; background: linear-gradient(transparent, #062b3deb); }
+.stage.live .camera-presence { display: flex; flex-direction: column; gap: 5px; }
+.camera-presence strong { font-size: 26px; }
+.camera-presence small { font-size: 15px; }
+#overlay, #labels, .legend { display: none; }
+.banner { bottom: 116px; color: white; background: #024480eb; }
+.row { margin-top: 16px; }
+.row button { width: 100%; min-height: 64px; border-radius: 18px; font-size: 20px; }
+#start { color: white; background: linear-gradient(#35a8ff, #0877df); }
+button.secondary { border: 1px solid #c8dce9; background: #ffffffdb; color: #024480; }
+#status { text-align: center; color: #426582; min-height: 20px; }
+#err { color: #ad2a22; background: #fff2ed; padding: 12px; border-radius: 12px; white-space: pre-wrap; }
+.camera-home { display: block; color: #024480; text-align: center; font-size: 14px; margin-top: 16px; }
+.camera-controls { width: min(100% - 16px, 480px); max-height: calc(100svh - 32px); border: 0; border-radius: 28px; padding: 24px; color: #173a5b; background: #fff; }
+.camera-controls::backdrop { background: #102b4260; backdrop-filter: blur(6px); }
+.camera-controls-heading h2 { margin: 0; font-size: 24px; }
+.camera-controls-heading button { background: #e9f2fb; padding: 10px 16px; }
+.camera-controls > button { display: block; width: 100%; margin-top: 18px; text-align: left; padding: 16px; background: #eff6fc; border: 1px solid #d9e6f1; border-radius: 16px; }
+.camera-controls h3 { border-top: 1px solid #d9e6f1; padding-top: 20px; }
+.camera-controls p { color: #426582; opacity: 1; }
+#mirror.active { background: #dcecff; }
+@media (min-width: 761px) { .stage { height: min(70svh, 700px); } }
+@media (max-width: 760px) { .camera-controls { margin: auto auto 0; border-radius: 28px 28px 0 0; width: 100%; max-width: none; padding-bottom: max(28px, env(safe-area-inset-bottom)); } }

@@ -12,6 +12,7 @@ export type SignalPayload = {
   pubIce: RTCIceCandidateInit[];
   viewIce: RTCIceCandidateInit[];
   sharing: boolean;
+  restartRequested: boolean;
   label: string;
   talkSessionId: number;
   talkOffer: RTCSessionDescriptionInit | null;
@@ -45,6 +46,7 @@ function empty(
     pubIce: [],
     viewIce: [],
     sharing: false,
+    restartRequested: false,
     label: "",
     talkSessionId,
     talkOffer: null,
@@ -110,11 +112,15 @@ export function applyDoorLiveSignal(body: {
   candidate?: RTCIceCandidateInit | null;
   label?: string;
   sessionId?: number;
+  talkSessionId?: number;
 }): SignalPayload {
   const s = store();
   const role = body.role ?? "pub";
   const type = body.type ?? "";
   if ((role === "pub" || role === "view") && type !== "offer" && body.sessionId !== undefined && body.sessionId !== s.sessionId) {
+    return getDoorLive();
+  }
+  if ((role === "care" || role === "bell") && type !== "talk-offer" && body.talkSessionId !== undefined && body.talkSessionId !== s.talkSessionId) {
     return getDoorLive();
   }
 
@@ -150,6 +156,10 @@ export function applyDoorLiveSignal(body: {
   if (type === "answer" && body.sdp && role === "view") {
     s.answer = body.sdp;
     s.viewIce = [];
+    s.updatedAt = new Date().toISOString();
+  }
+  if (type === "restart" && role === "view") {
+    s.restartRequested = true;
     s.updatedAt = new Date().toISOString();
   }
 

@@ -23,6 +23,7 @@ export function useDoorSense(onHelp: () => void) {
   const caregiverAudioRef = useRef<HTMLAudioElement>(null);
   const visitorAudioRef = useRef<HTMLAudioElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const externalStreamRef = useRef<MediaStream | null>(null);
   const microphoneRef = useRef<MediaStream | null>(null);
   const peerRef = useRef<RTCPeerConnection | null>(null);
   const visitorPeerRef = useRef<RTCPeerConnection | null>(null);
@@ -85,6 +86,15 @@ export function useDoorSense(onHelp: () => void) {
     if (owned) await signal({ role: "pub", type: "stop", sessionId });
   }, []);
 
+  const setExternalStream = useCallback((stream: MediaStream | null) => {
+    const previous = externalStreamRef.current;
+    externalStreamRef.current = stream;
+    if (!stream && previous && sharingRef.current && !streamRef.current) {
+      void stopSharing().catch((error: Error) => setMediaError(error.message));
+      setMessage("The phone camera disconnected. Your microphone and caregiver sharing are off. You can request sharing again when the camera reconnects.");
+    }
+  }, [stopSharing]);
+
   const closeMedia = useCallback(async () => {
     generationRef.current++;
     if (expiryRef.current) clearTimeout(expiryRef.current);
@@ -145,8 +155,9 @@ export function useDoorSense(onHelp: () => void) {
   }, [closeMedia]);
 
   const startSharing = useCallback(async () => {
-    await openCamera();
-    const camera = streamRef.current;
+    const externalCamera = externalStreamRef.current?.getVideoTracks().some(track => track.readyState === "live");
+    if (!externalCamera) await openCamera();
+    const camera = externalCamera ? externalStreamRef.current : streamRef.current;
     if (!camera) throw new Error("Your camera is unavailable. The help request can still be sent, but no video is shared.");
     await stopSharing();
     if (!mountedRef.current) throw new Error("Sharing was cancelled.");
@@ -158,6 +169,10 @@ export function useDoorSense(onHelp: () => void) {
       if (!mountedRef.current || generation !== generationRef.current) {
         microphone.getTracks().forEach((track) => track.stop());
         throw new Error("Sharing was cancelled.");
+      }
+      if (externalCamera && externalStreamRef.current !== camera) {
+        microphone.getTracks().forEach((track) => track.stop());
+        throw new Error("The phone camera disconnected before sharing started. Reconnect it and try again.");
       }
       microphone.getAudioTracks().forEach((track) => { track.enabled = false; });
       microphoneRef.current = microphone;
@@ -201,7 +216,7 @@ export function useDoorSense(onHelp: () => void) {
       };
       await pc.setLocalDescription(await pc.createOffer());
       if (!mountedRef.current || peerRef.current !== pc || generation !== generationRef.current) return;
-      const data = await signal({ role: "pub", type: "offer", sdp: pc.localDescription, label: "DoorSense · receiver device camera" });
+      const data = await signal({ role: "pub", type: "offer", sdp: pc.localDescription, label: externalCamera ? "DoorSense · phone door camera" : "DoorSense · receiver device camera" });
       if (!mountedRef.current || peerRef.current !== pc || generation !== generationRef.current) {
         await signal({ role: "pub", type: "stop", sessionId: data.sessionId });
         return;
@@ -211,11 +226,17 @@ export function useDoorSense(onHelp: () => void) {
       setSharing(true);
       offered = true;
       for (const candidate of candidates) await signal({ role: "pub", type: "ice", candidate, sessionId: data.sessionId });
+      if (!expiryRef.current) expiryRef.current = setTimeout(() => {
+        void closeMedia().catch((error: Error) => setMediaError(error.message));
+        setVisit(null);
+        setResponse("ended");
+        setMessage("This door session ended after five minutes. Your microphone and sharing are off.");
+      }, 300000);
     } catch (error) {
       await stopSharing();
       throw error;
     }
-  }, [openCamera, stopSharing]);
+  }, [openCamera, stopSharing, closeMedia]);
 
   const listenToVisitor = useCallback(async (data: SignalPayload) => {
     if (!data.bellMomOffer || visitorConnectingRef.current) return;
@@ -271,7 +292,6 @@ export function useDoorSense(onHelp: () => void) {
             setResponse(null);
             setMessage("");
             speak("Someone is at the door. You can choose what happens next.");
-            if (!sharingRef.current) void openCamera();
           }
         }
       } catch (error) {
@@ -287,10 +307,10 @@ export function useDoorSense(onHelp: () => void) {
       clearTimeout(timer);
       void closeMedia().catch((error: Error) => console.error("DoorSense cleanup:", error.message));
     };
-  }, [closeMedia, openCamera]);
+  }, [closeMedia]);
 
   useEffect(() => {
-    if (!cameraOn) return;
+    if (!cameraOn && !sharing) return;
     const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout>;
     async function tick() {
@@ -299,7 +319,9 @@ export function useDoorSense(onHelp: () => void) {
         if (controller.signal.aborted) return;
         const pc = peerRef.current;
         if (pc && sharingRef.current) {
-          if (data.sessionId !== sessionRef.current || !data.sharing) {
+          if (data.sessionId === sessionRef.current && data.restartRequested) {
+            await startSharing();
+          } else if (data.sessionId !== sessionRef.current || !data.sharing) {
             await stopSharing();
             setResponse("ended");
             setMessage("The caregiver sharing session has ended.");
@@ -328,7 +350,7 @@ export function useDoorSense(onHelp: () => void) {
     }
     void tick();
     return () => { controller.abort(); clearTimeout(timer); };
-  }, [cameraOn, listenToVisitor, stopSharing, stopVisitor]);
+  }, [cameraOn, sharing, listenToVisitor, startSharing, stopSharing, stopVisitor]);
 
   useEffect(() => {
     if (caregiverAudioRef.current) caregiverAudioRef.current.volume = caregiverVolume;
@@ -397,6 +419,6 @@ export function useDoorSense(onHelp: () => void) {
     videoRef, caregiverAudioRef, visitorAudioRef, pending, visit, loaded, pollError, mediaError,
     message, cameraOn, cameraOpening, sharing, connectedAt, caregiverAudio, visitorAudio,
     micMuted, caregiverVolume, visitorVolume, setCaregiverVolume, setVisitorVolume, busy,
-    response, setResponse, openCamera, respond, endSession, toggleMic, enableSound,
+    response, setResponse, openCamera, respond, endSession, toggleMic, enableSound, setExternalStream,
   };
 }

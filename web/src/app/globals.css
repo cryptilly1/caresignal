@@ -2575,6 +2575,149 @@ button.care-chip::after,
   gap: 8px;
 }
 
+.care-chip.care-chip--motion {
+  border-color: #f3ada9;
+  background: #ffe6e4;
+  color: #ae2925;
+}
+
+.door-motion-notice {
+  position: fixed;
+  z-index: 120;
+  top: max(20px, env(safe-area-inset-top));
+  left: 50%;
+  display: flex;
+  width: min(440px, calc(100% - 32px));
+  align-items: center;
+  gap: 12px;
+  transform: translateX(-50%);
+  border: 1px solid #fff9;
+  border-radius: 18px;
+  padding: 16px;
+  background: #f5fafff2;
+  box-shadow: 0 8px 36px #07364b30;
+  color: #024480;
+  backdrop-filter: blur(18px);
+  animation: door-notice-enter 240ms ease-out;
+}
+
+.door-motion-notice > span { flex: 1; }
+.door-motion-notice button,
+.live-door-assist__header button,
+.care-notification__dismiss {
+  display: grid;
+  min-width: 36px;
+  min-height: 36px;
+  flex-shrink: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #e3eff9;
+  color: #024480;
+  cursor: pointer;
+}
+
+@keyframes door-notice-enter {
+  from { opacity: 0; translate: 0 -20px; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+.door-camera-preview {
+  position: relative;
+  width: 100%;
+  min-height: 220px;
+  height: 100%;
+  overflow: hidden;
+  border-radius: inherit;
+  background: #17394b;
+  color: white;
+}
+
+.door-camera-preview video,
+.doorsense-video .door-camera-preview video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 1;
+}
+
+.door-camera-preview__empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px;
+  background: #17394b;
+  color: #e1eff8;
+  text-align: center;
+}
+
+.door-camera-preview__badge {
+  position: absolute;
+  z-index: 1;
+  top: 14px;
+  left: 14px;
+  border-radius: 20px;
+  padding: 8px 12px;
+  background: #084363eb;
+  color: white;
+  font-size: 12px;
+}
+
+.door-camera-preview__error {
+  position: absolute;
+  inset: auto 12px 12px;
+  border-radius: 10px;
+  padding: 10px;
+  background: #7d3027;
+  color: white;
+}
+
+.receiver-door__preview.receiver-door__preview--live { padding: 0; overflow: hidden; }
+.door-camera-preview--compact { min-height: 180px; }
+.doorsense-video__placeholder { position: absolute; inset: 0; background: #e5f3fd; }
+.home-section-actions, .care-notifications__footer { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+.care-notifications { position: relative; isolation: isolate; }
+.care-notifications--stacked { margin-bottom: 16px; }
+.care-notifications--stacked::before,
+.care-notifications--stacked::after {
+  position: absolute;
+  z-index: -1;
+  inset: 16px 12px -8px;
+  border: 1px solid #ffffffc2;
+  border-radius: inherit;
+  background: #ddecf7;
+  content: "";
+}
+.care-notifications--stacked::after { z-index: -2; inset: 32px 24px -16px; background: #c4e0f3; }
+.care-notification { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.care-notification > a { display: grid; flex: 1; gap: 6px; color: #024480; text-decoration: none; }
+.care-notification__dismiss { font-size: 24px; }
+.care-notifications .care-card__heading { flex-wrap: wrap; gap: 10px; }
+.care-notifications__footer { justify-content: space-between; }
+.live-door-assist { display: flex; flex-direction: column; gap: 18px; color: #173a5b; }
+.live-door-assist__header { display: flex; align-items: center; gap: 12px; color: #38647c; font-size: 14px; }
+.live-door-assist__header > span:first-child { display: flex; flex: 1; align-items: center; gap: 8px; color: #024480; font-weight: 600; }
+.live-door-assist > h2 { margin: 0; font-size: clamp(24px, 3vw, 30px); line-height: 1.2; }
+.live-door-assist__state { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; font-size: 13px; color: #536b80; }
+.live-door-assist__video { position: relative; min-height: 280px; overflow: hidden; border-radius: 22px; background: #17394b; }
+.live-door-assist__video > video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.live-door-assist__voice { display: flex; gap: 14px; align-items: center; border-radius: 18px; padding: 20px; background: #ffffffcb; }
+.live-door-assist__voice > svg { flex-shrink: 0; color: #024480; }
+.live-door-assist__voice p { margin: 6px 0 0; font-size: 14px; line-height: 1.5; color: #536b80; }
+.live-door-assist__actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.live-door-assist__actions > button { flex: 1; min-height: 56px; }
+.live-door-assist__alert { display: flex; align-items: center; gap: 12px; justify-content: space-between; padding: 18px; border: 1px solid #d9e8f3; border-radius: 18px; background: #ffffffc2; color: #024480; text-decoration: none; }
+.live-door-assist__alert > span { display: grid; gap: 6px; }
+.live-door-assist__alert small { color: #536b80; }
+.alerts-rail-controls > button.care-text-button { width: auto; min-height: 36px; height: auto; border: 0; border-radius: 8px; padding: 4px 8px; background: transparent; font-size: 13px; font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { .door-motion-notice { animation: none; } }
+
 @media (max-width: 370px) {
   .care-home__header:has(.care-home__simulate) .onboarding-wordmark {
     gap: 6px;

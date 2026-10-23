@@ -33,6 +33,7 @@ export function CareAlerts() {
   const [selectedBucket, setBucket] = useState<Bucket | null>(null);
   const bucket = selectedBucket ?? (state.alerts.some((alert) => alert.status === "escalated") ? "escalated" : state.alerts.some((alert) => alert.status === "open") ? "open" : state.alerts.some((alert) => alert.status === "acknowledged") ? "acknowledged" : "escalated");
   const [clearId, setClearId] = useState<string | null>(null);
+  const [clearIds, setClearIds] = useState<string[] | null>(null);
   const [checkedAt, setCheckedAt] = useState<string | null>(null);
   const [railState, setRailState] = useState({ position: 0, atStart: true, atEnd: true });
   const rail = useRef<HTMLDivElement>(null);
@@ -68,7 +69,7 @@ export function CareAlerts() {
         <div className="alerts-check"><span>{checkedAt ? `Checked ${checkedAt}` : "Response timers follow your care rules"}</span><button className="care-text-button" onClick={() => { runEscalationPass(); setCheckedAt(new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })); }} type="button">Check responses</button></div>
         <CarePills label="Alert status" value={bucket} options={(Object.keys(bucketTitles) as Bucket[]).map((value) => ({ value, label: bucketTitles[value], count: state.alerts.filter((alert) => alert.status === value).length }))} onChange={select} />
       </>}
-      <CareSection title={history ? "Previous care alerts" : bucketTitles[bucket]} className="alerts-section" action={!history && alerts.length > 1 ? <div className="alerts-rail-controls"><button aria-label="Previous alert" disabled={railState.atStart} onClick={() => browse(-1)} type="button"><ChevronLeft aria-hidden="true" size={18} strokeWidth={2} /></button><button aria-label="Next alert" disabled={railState.atEnd} onClick={() => browse(1)} type="button"><ChevronRight aria-hidden="true" size={18} strokeWidth={2} /></button></div> : undefined}>
+      <CareSection title={history ? "Previous care alerts" : bucketTitles[bucket]} className="alerts-section" action={!history && active.length > 0 ? <div className="alerts-rail-controls"><button className="care-text-button" onClick={() => setClearIds(active.map(alert => alert.id))} type="button">Clear all</button>{alerts.length > 1 && <><button aria-label="Previous alert" disabled={railState.atStart} onClick={() => browse(-1)} type="button"><ChevronLeft aria-hidden="true" size={18} strokeWidth={2} /></button><button aria-label="Next alert" disabled={railState.atEnd} onClick={() => browse(1)} type="button"><ChevronRight aria-hidden="true" size={18} strokeWidth={2} /></button></>}</div> : undefined}>
         {alerts.length ? <div className={history ? "workspace-stack" : "alerts-rail"} aria-label={history ? "Alert history" : bucketTitles[bucket]} ref={rail} onScroll={(event) => {
           setRailState(railPosition(event.currentTarget));
         }}>
@@ -92,5 +93,6 @@ export function CareAlerts() {
       {!history && <p className="settings-note">Accepting takes ownership and stops escalation. It doesn’t mark care complete.</p>}
     </div>
     {clearing && <BottomDrawer title="Clear this care alert?" onClose={() => setClearId(null)}><div className="settings-form"><p className="care-body-copy">{clearing.title}</p><p className="care-muted">Remove it from open alerts without marking care as completed. Its timeline stays in history, and any follow-up tasks stay open.</p><button className="cs-button cs-button--primary" onClick={() => { clearAlert(clearing.id); setClearId(null); }} type="button">Clear from open alerts</button><button className="cs-button cs-button--glass" onClick={() => setClearId(null)} type="button">Keep alert open</button></div></BottomDrawer>}
+    {clearIds && <BottomDrawer title="Clear all open care alerts?" onClose={() => setClearIds(null)}><div className="settings-form"><p className="care-body-copy">Clear these {clearIds.length} alerts, including accepted care in progress. This does not mark care complete. Timelines stay in history and follow-up tasks stay open. New alerts received after opening this confirmation will stay open.</p><button className="cs-button cs-button--primary" onClick={() => { clearIds.forEach(clearAlert); setClearIds(null); }} type="button">Clear all {clearIds.length} alerts</button><button className="cs-button cs-button--glass" onClick={() => setClearIds(null)} type="button">Keep alerts open</button></div></BottomDrawer>}
   </CareWorkspace>;
 }

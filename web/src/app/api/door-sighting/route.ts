@@ -4,6 +4,7 @@ import {
   listDoorSightings,
   postDoorSighting,
 } from "@/lib/door-sighting-server";
+import { setDoorSensePending } from "@/lib/doorsense-server";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,9 @@ export async function POST(req: Request) {
     kind: body.kind,
     liveAssist: body.liveAssist,
   });
+  if (!body.liveAssist && !event.label.startsWith("Test ·")) {
+    setDoorSensePending({ label: event.label, source: "Phone camera", id: event.id, announce: false });
+  }
   return NextResponse.json(event, { headers: noStore });
 }
 

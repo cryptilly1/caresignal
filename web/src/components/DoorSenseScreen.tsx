@@ -10,6 +10,8 @@ import { currentOnDuty, formatTime, memberById, visitWindowHint } from "@/lib/en
 import { initials } from "@/lib/care-setup";
 import { useStore } from "@/lib/store";
 import { useDoorSense } from "@/lib/use-doorsense";
+import { DoorCameraPreview } from "./DoorCameraPreview";
+import { DoorMotionNotice } from "./DoorMotionNotice";
 
 function DoorAction({ icon, title, detail, tone = "glass", disabled, onClick }: {
   icon: ReactNode; title: string; detail?: string; tone?: "glass" | "primary" | "help"; disabled?: boolean; onClick: () => void;
@@ -33,6 +35,7 @@ export function DoorSenseScreen() {
   const { state, hydrated, requestHelp } = useStore();
   const { videoRef, caregiverAudioRef, visitorAudioRef, ...door } = useDoorSense(requestHelp);
   const [audioSettings, setAudioSettings] = useState(false);
+  const [externalCamera, setExternalCamera] = useState(false);
   const [clock, setClock] = useState<Date | null>(null);
   const caregiver = memberById(state, currentOnDuty(state))?.name ?? "your caregiver";
   const connected = door.connectedAt !== null;
@@ -40,7 +43,7 @@ export function DoorSenseScreen() {
   const elapsed = door.connectedAt !== null && clock ? Math.max(0, Math.floor((clock.getTime() - door.connectedAt) / 1000)) : 0;
   const timer = `${Math.floor(elapsed / 60).toString().padStart(2, "0")}:${(elapsed % 60).toString().padStart(2, "0")}`;
   const confirmation = door.response === "expecting" || door.response === "dismiss" || door.response === "ended";
-  const heading = connected ? `${caregiver} is here with you` : door.sharing ? `Letting ${caregiver} know` : showDoor ? "Someone is at the door" : "DoorSense";
+  const heading = connected ? `${caregiver} is here with you` : door.sharing ? `Letting ${caregiver} know` : showDoor ? "Person at the door" : "DoorSense";
   const subtitle = connected ? "You’re sharing your camera view." : door.sharing ? "Stay here while your caregiver answers." : showDoor ? "You can choose what happens next." : "Take your time. We’ll let you know.";
 
   useEffect(() => {
@@ -51,6 +54,7 @@ export function DoorSenseScreen() {
   }, []);
 
   return <main className={`doorsense-screen caregiver-home settings-screen ${inter.variable} ${jakarta.variable}`}>
+    <DoorMotionNotice event={door.visit} />
     <div className="doorsense-shell">
       <CareHomeHeader centered back={{ href: "/recipient", label: "My day" }} initials={initials(state.careRecipientName)} onAccount={() => setAudioSettings(true)} />
       <div className="doorsense-content" aria-busy={!hydrated || door.busy}>
@@ -70,13 +74,14 @@ export function DoorSenseScreen() {
 
         <div className="doorsense-main" hidden={!showDoor}>
           <section className="care-card doorsense-camera-card" aria-label="Door camera">
-            <header className="home-section-heading"><h2>Front door</h2><span className={`care-chip${door.cameraOn ? " care-chip--blue" : ""}`}>{door.cameraOpening ? "Opening" : door.cameraOn ? "Camera on" : "Camera off"}</span></header>
+            <header className="home-section-heading"><h2>Front door</h2><span className={`care-chip${door.visit ? " care-chip--motion" : door.cameraOn || externalCamera ? " care-chip--blue" : ""}`}>{door.visit ? "Motion detected" : door.cameraOpening ? "Opening" : door.cameraOn || externalCamera ? "Watching" : "Camera off"}</span></header>
             <div className={`doorsense-video${door.cameraOn ? " doorsense-video--on" : ""}`}>
-              <video ref={videoRef} playsInline muted autoPlay aria-label="Live receiver-device camera stand-in" />
-              {!door.cameraOn && <div className="doorsense-video__placeholder"><CameraOff aria-hidden="true" size={42} strokeWidth={1.5} /><h2>{door.cameraOpening ? "Opening the camera" : "Camera view is closed"}</h2><p>{door.cameraOpening ? "Your microphone stays off." : "Allow the camera to see this device’s door stand-in."}</p>{!door.cameraOpening && <button className="cs-button cs-button--primary" disabled={door.busy} onClick={() => void door.openCamera()} type="button"><Camera aria-hidden="true" size={20} />Open camera</button>}</div>}
+              {!door.cameraOn && <DoorCameraPreview enabled={showDoor} onAvailability={setExternalCamera} onStream={door.setExternalStream} />}
+              <video ref={videoRef} hidden={!door.cameraOn} playsInline muted autoPlay aria-label="Live receiver-device camera stand-in" />
+              {!door.cameraOn && !externalCamera && <div className="doorsense-video__placeholder"><CameraOff aria-hidden="true" size={42} strokeWidth={1.5} /><h2>{door.cameraOpening ? "Opening the camera" : "Camera view is closed"}</h2><p>{door.cameraOpening ? "Your microphone stays off." : "Allow the camera to see this device’s door stand-in."}</p>{!door.cameraOpening && <button className="cs-button cs-button--primary" disabled={door.busy} onClick={() => void door.openCamera()} type="button"><Camera aria-hidden="true" size={20} />Open camera</button>}</div>}
               {door.cameraOn && <><span className="doorsense-video__badge"><span />Live · Device camera</span><div className="doorsense-video__caption"><strong>{door.visit?.label ?? "Door view"}</strong><span>{connected ? "Sharing with your caregiver" : door.sharing ? "Waiting for caregiver connection" : "Only this device is viewing"}</span></div></>}
             </div>
-            <p className="settings-note">This device’s camera is the door stand-in, not a Ring video feed.</p>
+            <p className="settings-note">{externalCamera && !door.cameraOn ? `Live view from the phone watching your door. Your microphone is ${door.micMuted ? "off" : "on for your caregiver"}.` : "This device’s camera is the door stand-in, not a Ring video feed."}</p>
           </section>
 
           {door.sharing ? <section className="care-card doorsense-call">

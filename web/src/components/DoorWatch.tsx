@@ -56,7 +56,7 @@ export function DoorWatch() {
           if (seenRef.current.has(e.id)) continue;
           seenRef.current.add(e.id);
           if (e.at > sinceRef.current) sinceRef.current = e.at;
-          const alerted = ingestPhoneSighting(e.label);
+          const alerted = !e.label.startsWith("Test ·") && ingestPhoneSighting(e.label);
           // Sound + red banner (same as Ring)
           notifyDoorAlert({
             label: e.label,
@@ -110,7 +110,7 @@ export function DoorWatch() {
       >
         <span className="door-toast__icon">{alerted ? <BellRing aria-hidden="true" size={24} /> : <DoorOpen aria-hidden="true" size={24} />}</span>
         <div className="door-toast__copy">
-            <div className="door-toast__meta"><span className={`care-chip${alerted ? " care-chip--pending" : " care-chip--blue"}`}>{alerted ? "Door alert" : "Door activity"}</span>{toast.source && <span>{toast.source === "phone" ? "Camera stand-in" : toast.source}</span>}</div>
+            <div className="door-toast__meta">            <span className={`care-chip${alerted ? " care-chip--pending" : " care-chip--blue"}`}>{toast.label.startsWith("Test ·") ? "Test" : alerted ? "Door alert" : "Door activity"}</span>{toast.source && <span>{toast.source === "phone" ? "Camera stand-in" : toast.source}</span>}</div>
             <p className="door-toast__title">{toast.label}</p>
             {alerted && (
               <Link

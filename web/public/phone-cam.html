@@ -173,38 +173,45 @@
         opacity: 0.85;
       }
     </style>
+    <link rel="stylesheet" href="/door-camera.css" />
   </head>
   <body>
-    <h1>Phone camera</h1>
-    <p id="hint">
-      Detector: <strong>COCO-SSD</strong> (browser). Green = person (big enough
-      box). Yellow = small / partial person-like. White = other objects. YOLO +
-      OSNet Re-ID is the next server-side step.
-    </p>
+    <header class="camera-brand"><span><img alt="" src="/images/welcome/heart-pulse.svg" width="32" height="32" />CareSignal</span><small>Door camera</small></header>
+    <div class="camera-heading"><h1>Front door</h1><button id="controls" type="button" aria-haspopup="dialog">Controls</button></div>
     <div class="stage" id="stage">
       <video id="v" playsinline muted autoplay></video>
       <canvas id="overlay"></canvas>
       <div id="labels" aria-hidden="true"></div>
-      <div class="off" id="off">Tap <strong>Start camera</strong> below</div>
+      <div class="off" id="off"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m2 2 20 20M9 4h5l2 3h4v13H4V7h3"/><path d="M9 9a5 5 0 0 0 6 6"/></svg><strong>Camera is off</strong><span>No image is captured or shared.<br />Person detection is off.</span></div>
       <div class="banner" id="banner">Person</div>
+      <span class="camera-live-badge">● Live · Watching</span>
+      <div class="camera-presence"><strong id="presence">No person detected</strong><small id="detection-note">Preparing person detection...</small></div>
     </div>
     <div class="legend">
       <span><i class="swatch" style="color: #30d158"></i> Person</span>
       <span><i class="swatch" style="color: #ffd60a"></i> Partial / small</span>
       <span><i class="swatch" style="color: #fff"></i> Object / animal</span>
     </div>
-    <p id="settingsLabel">Settings: loading…</p>
-    <p id="status">Watching: off</p>
+    <p id="status" role="status">Start when you’re ready to watch the door.</p>
     <p id="err" hidden></p>
     <div class="row">
-      <button type="button" id="start">Start camera</button>
-      <button type="button" id="stop" class="secondary" hidden>Stop</button>
-      <button type="button" id="flip" class="secondary" hidden>Flip lens</button>
-      <button type="button" id="mirror" class="secondary" hidden>Mirror</button>
-      <button type="button" id="test" class="secondary" hidden>Test notify</button>
+      <button type="button" id="start" disabled>▷ Start watching</button>
+      <button type="button" id="stop" class="secondary" hidden>□ Stop watching</button>
     </div>
-    <a href="/today">← Caregiver home</a>
+    <a class="camera-home" href="/care-circle?view=activity">Back to caregiver Home</a>
+    <dialog id="camera-controls" class="camera-controls" aria-labelledby="controls-title">
+      <header class="camera-controls-heading"><h2 id="controls-title">Camera controls</h2><button id="done" type="button">Done</button></header>
+      <button type="button" id="flip" hidden>Flip camera · rear to front</button>
+      <button type="button" id="mirror" hidden>Mirror preview · Off</button>
+      <p>Reflect the image left to right. This doesn’t switch cameras.</p>
+      <h3>Check notifications</h3>
+      <p>Send family a message marked “Test”. This is not a care alert.</p>
+      <button type="button" id="test">Send test notification</button>
+      <p id="test-result" role="status"></p>
+      <p id="settingsLabel">Person detection settings are loading...</p>
+    </dialog>
 
+    <script src="/door-camera-publisher.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
     <script>
@@ -237,11 +244,22 @@
         var flipBtn = document.getElementById("flip");
         var mirrorBtn = document.getElementById("mirror");
         var testBtn = document.getElementById("test");
+        if (typeof window.createDoorCameraPublisher !== "function") {
+          showError("Camera sharing could not load. Check your connection and reload this page.");
+          return;
+        }
+        var publisher = window.createDoorCameraPublisher(showError);
+        var presence = document.getElementById("presence");
+        var controls = document.getElementById("camera-controls");
+        document.getElementById("controls").onclick = function () { controls.showModal(); };
+        document.getElementById("done").onclick = function () { controls.close(); };
+        controls.addEventListener("click", function (event) { if (event.target === controls) controls.close(); });
 
         var stream = null;
         var facing = "environment";
         var mirrored = false;
         var running = false;
+        var cameraGeneration = 0;
         var raf = 0;
         var coolUntil = 0;
         var hadPerson = false;
@@ -308,19 +326,19 @@
           stopBtn.hidden = !on;
           flipBtn.hidden = !on;
           mirrorBtn.hidden = !on;
-          testBtn.hidden = !on;
         }
         function applyMirror() {
           stage.classList.toggle("mirrored", mirrored);
           mirrorBtn.classList.toggle("active", mirrored);
-          mirrorBtn.textContent = mirrored ? "Mirror on" : "Mirror";
+          mirrorBtn.setAttribute("aria-pressed", String(mirrored));
+          mirrorBtn.textContent = mirrored ? "Mirror preview · On" : "Mirror preview · Off";
           mirrorBtn.classList.toggle("secondary", !mirrored);
         }
         function renderSettings() {
           settingsLabel.textContent =
             "Detect: " +
             settings.mode +
-            " · COCO-SSD · " +
+            " · " +
             settings.sensitivity +
             " · alerts: " +
             settings.alertPolicy;
@@ -439,12 +457,12 @@
         async function ensureModel() {
           if (model) return;
           if (!window.cocoSsd) {
-            throw new Error("COCO-SSD script failed to load (CDN).");
+            throw new Error("Person detection could not load. Check your internet connection.");
           }
-          setStatus("Loading COCO-SSD…");
+          setStatus("Preparing person detection...");
           // lite_mobilenet_v2 is light enough for phones
           model = await cocoSsd.load({ base: "lite_mobilenet_v2" });
-          setStatus("COCO-SSD ready");
+          setStatus("Person detection is ready.");
         }
 
         async function pullSettings() {
@@ -479,9 +497,10 @@
         }
 
         async function reportSighting(label) {
+          var isTest = label.startsWith("Test ·");
           notifyLocal(label);
           lastAlertLabel = "Sending…";
-          setStatus("Sending alert to Today…");
+          setStatus("Notifying your care circle...");
           try {
             var res = await fetch("/api/door-sighting", {
               method: "POST",
@@ -490,11 +509,15 @@
             });
             if (!res.ok) throw new Error("HTTP " + res.status);
             lastAlertLabel =
-              "Alert sent · " + new Date().toLocaleTimeString();
+              (isTest ? "Test notification sent · " : "Alert sent · ") + new Date().toLocaleTimeString();
             setStatus(lastAlertLabel);
             showError("");
+            if (isTest) {
+              testBtn.textContent = "✓ Test notification sent";
+              document.getElementById("test-result").textContent = "Sent to family · marked “Test”. " + (stream ? "The door camera is still watching." : "The camera is off.");
+            }
           } catch (e) {
-            alertedThisPresence = false; // allow retry on next green frame
+            if (!isTest) alertedThisPresence = false;
             lastAlertLabel = "";
             showError(
               "Could not reach CareSignal server (tunnel?). Keep Mac server running.",
@@ -509,9 +532,11 @@
           if (Date.now() < readyAt) return;
           if (Date.now() - lastDetect < 280) return;
           detectBusy = true;
+          var detectingStream = stream;
           lastDetect = Date.now();
           try {
             var preds = await model.detect(video, 12);
+            if (!running || stream !== detectingStream) return;
             var raw = classify(preds);
             var sawPerson = false;
             var partial = 0;
@@ -527,6 +552,7 @@
             else personStreak = Math.max(0, personStreak - 1);
             var need = conf().streak;
             var confirmed = sawPerson && personStreak >= need;
+            presence.textContent = confirmed ? "Person present" : "No person detected";
 
             boxes = raw;
             var now = Date.now();
@@ -538,7 +564,7 @@
               if (!alertedThisPresence) {
                 alertedThisPresence = true;
                 coolUntil = now + 3000; // tiny gap only against double-fire
-                void reportSighting("Person at the door · COCO-SSD");
+                void reportSighting("Person at the door");
               }
             } else if (hadPerson) {
               if (!personGoneAt) personGoneAt = now;
@@ -554,7 +580,7 @@
               now > coolUntil
             ) {
               coolUntil = now + 8000;
-              void reportSighting("Motion at the door · COCO-SSD");
+              void reportSighting("Motion at the door");
             }
 
             var head = confirmed
@@ -564,15 +590,7 @@
               : sawPerson
                 ? "Person"
                 : "Watching";
-            setStatus(
-              head +
-                " · dets " +
-                preds.length +
-                " · partial " +
-                partial +
-                " · other " +
-                other
-            );
+            setStatus(confirmed ? head : "This phone is watching the front door.");
           } catch (e) {
             console.error(e);
             setStatus("Detect error — retrying");
@@ -597,6 +615,8 @@
         }
 
         function stopTracksOnly() {
+          cameraGeneration++;
+          var sharingStopped = publisher.stop();
           if (raf) cancelAnimationFrame(raf);
           raf = 0;
           running = false;
@@ -616,13 +636,14 @@
           octx && octx.clearRect(0, 0, overlay.width, overlay.height);
           if (labelsEl) labelsEl.innerHTML = "";
           banner.classList.remove("show");
+          return sharingStopped;
         }
 
         function stop() {
-          stopTracksOnly();
+          void stopTracksOnly().catch(function (error) { showError(error.message); });
           setOn(false);
-          off.textContent = "Tap Start camera below";
-          setStatus("Watching: off");
+          off.innerHTML = "<strong>Camera is off</strong><span>No image is captured or shared.<br>Person detection is off.</span>";
+          setStatus("Start when you’re ready to watch the door.");
         }
 
         async function start(face) {
@@ -631,16 +652,18 @@
             showError("Need https:// — use the Cloudflare link on your phone.");
             return;
           }
-          stopTracksOnly();
+          await stopTracksOnly();
+          var attempt = cameraGeneration;
           stage.classList.remove("live");
           off.removeAttribute("hidden");
           off.textContent = "Opening camera…";
           setStatus("Opening camera…");
           await pullSettings();
+          if (attempt !== cameraGeneration) return;
           ensureNotifyPermission().catch(function () {});
 
           try {
-            stream = await navigator.mediaDevices.getUserMedia({
+            var nextStream = await navigator.mediaDevices.getUserMedia({
               video: {
                 facingMode: { ideal: face || facing },
                 width: { ideal: 1280 },
@@ -648,13 +671,20 @@
               },
               audio: false,
             });
+            if (attempt !== cameraGeneration) { nextStream.getTracks().forEach(function (track) { track.stop(); }); return; }
+            stream = nextStream;
             video.srcObject = stream;
             await video.play();
             facing = face || facing;
+            flipBtn.textContent = facing === "environment" ? "Flip camera · rear to front" : "Flip camera · front to rear";
             setOn(true);
+            await publisher.start(stream);
+            if (attempt !== cameraGeneration) return;
             sizeOverlay();
-            setStatus("Camera live · loading COCO-SSD…");
+            setStatus("Camera live · preparing person detection...");
           } catch (e) {
+            if (attempt !== cameraGeneration) return;
+            await stopTracksOnly().catch(function (error) { console.error(error); });
             var msg = (e && e.message) || "Could not open the camera.";
             off.textContent = "Camera blocked — tap Start again";
             setOn(false);
@@ -671,15 +701,18 @@
             await ensureModel();
           } catch (e) {
             console.error(e);
-            setStatus("Camera live · model failed");
+            document.getElementById("detection-note").textContent = "Person detection is unavailable";
+            setStatus("Camera live · person detection unavailable");
             showError(
-              "Video works, but COCO-SSD failed: " +
+              "Video works, but person detection could not start: " +
                 ((e && e.message) || e) +
                 "\nCheck network and tap Start again."
             );
             return;
           }
 
+          if (attempt !== cameraGeneration) return;
+          document.getElementById("detection-note").textContent = "Person detection is on";
           running = true;
           readyAt = Date.now() + 400;
           coolUntil = 0;
@@ -692,20 +725,30 @@
           loop();
         }
 
-        startBtn.onclick = function () {
-          start(facing);
-        };
+        var starting = false;
+        async function startWatching(face) {
+          if (starting) return;
+          starting = true;
+          startBtn.disabled = true;
+          flipBtn.disabled = true;
+          document.getElementById("detection-note").textContent = "Preparing person detection...";
+          try { await start(face); } catch (error) { showError(error.message); }
+          finally { starting = false; startBtn.disabled = false; flipBtn.disabled = false; }
+        }
+        startBtn.onclick = function () { void startWatching(facing); };
+        startBtn.disabled = false;
         stopBtn.onclick = stop;
         flipBtn.onclick = function () {
-          start(facing === "environment" ? "user" : "environment");
+          void startWatching(facing === "environment" ? "user" : "environment");
         };
         mirrorBtn.onclick = function () {
           mirrored = !mirrored;
           applyMirror();
         };
         testBtn.onclick = function () {
-          reportSighting("Test · person at door");
+          reportSighting("Test · door camera notification");
         };
+        window.addEventListener("pagehide", function () { void stopTracksOnly().catch(function (error) { console.error(error); }); });
         applyMirror();
         window.addEventListener("resize", sizeOverlay);
 

@@ -26,6 +26,8 @@ export function CaregiverSimulations({ open, onClose }: { open: boolean; onClose
   const [events, setEvents] = useState<TestEvent[]>([]);
   const [notice, setNotice] = useState("");
   const [liveError, setLiveError] = useState("");
+  const [dismissed, setDismissed] = useState<string[]>([]);
+  const [expanded, setExpanded] = useState(false);
   useEffect(() => {
     const controller = new AbortController();
     async function checkConnection() {
@@ -43,7 +45,8 @@ export function CaregiverSimulations({ open, onClose }: { open: boolean; onClose
     const timer = window.setInterval(() => void checkConnection(), 15_000);
     return () => { controller.abort(); window.clearInterval(timer); };
   }, []);
-  const active = state.alerts.filter(a => ["open", "acknowledged", "escalated"].includes(a.status));
+  const active = state.alerts.filter(a => ["open", "acknowledged", "escalated"].includes(a.status) && !dismissed.includes(a.id))
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   function simulate(scenario: typeof scenarios[number]) {
     setEvents(current => [{
       id: crypto.randomUUID(), title: scenario.title, detail: scenario.detail,
@@ -54,10 +57,14 @@ export function CaregiverSimulations({ open, onClose }: { open: boolean; onClose
   return <>
     <CaregiverDoorAssist hideIdle />
     {liveError && <p className="care-home__message simulation-live" role="status">{liveError}</p>}
-    {active.length > 0 && <section className="care-card simulation-live">
-      <div className="care-card__heading"><h2>Incoming care alerts</h2><Link className="care-text-button" href="/escalation">View alerts</Link></div>
-      <p className="care-body-copy">Shared care-circle activity · separate from simulations</p>
-      {active.slice(0, 3).map(a => <Link className="simulation-event" key={a.id} href={`/alerts/${encodeURIComponent(a.id)}`}><strong>{a.title}</strong><span>Open care response</span></Link>)}
+    {active.length > 0 && <section className={`care-card simulation-live care-notifications${!expanded && active.length > 1 ? " care-notifications--stacked" : ""}`} aria-label="Incoming care notifications">
+      <div className="care-card__heading"><h2>Incoming care alerts · {active.length}</h2><button className="care-text-button" type="button" onClick={() => setDismissed(current => [...current, ...active.map(a => a.id)])}>Dismiss all</button></div>
+      {(expanded ? active : active.slice(0, 1)).map(a => <article className="simulation-event care-notification" key={a.id}>
+        <Link href={`/alerts/${encodeURIComponent(a.id)}`}><strong>{a.title}</strong><span>Open care response</span></Link>
+        <button className="care-notification__dismiss" type="button" aria-label={`Dismiss notification: ${a.title}`} onClick={() => setDismissed(current => [...current, a.id])}>×</button>
+      </article>)}
+      <div className="care-notifications__footer">{active.length > 1 && <button className="care-text-button" type="button" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>{expanded ? "Stack notifications" : `Show all ${active.length}`}</button>}<Link className="care-text-button" href="/escalation">View alerts</Link></div>
+      <p className="care-muted">Dismissing a notification doesn’t clear its care alert.</p>
     </section>}
     {events.length > 0 && <section className="care-card simulation-results" aria-label="Simulated events">
       <div className="care-card__heading"><h2>Simulated events</h2><button className="care-text-button" type="button" onClick={() => setEvents([])}>Clear tests</button></div>
