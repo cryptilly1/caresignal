@@ -133,8 +133,8 @@ function RoleCard({
           </span>
           <span className="onboarding-role-card__description">
             {caregiver
-              ? "Set up a household and bring your care team together."
-              : "Join your family and check up with them on your way"}
+              ? "Bring your care team together."
+              : "Stay connected with your family."}
           </span>
         </span>
       </span>
