@@ -29,10 +29,12 @@ export function WelcomeScreen() {
   const [authError, setAuthError] = useState("");
 
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("signin") === "1") setShowEmailSheet(true);
+    if (new URLSearchParams(window.location.search).get("signin") !== "1") return;
+    const timer = window.setTimeout(() => setShowEmailSheet(true), 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
-  async function provider(provider: "google" | "github") {
+  async function signInWithGoogle() {
     if (busy) return;
     setBusy(true); setNotice(""); setAuthError("");
     try {
@@ -41,9 +43,9 @@ export function WelcomeScreen() {
       });
       if (!settings.ok) throw new Error("Sign-in providers could not be loaded. Please try again.");
       const config = await settings.json() as { external?: Record<string, boolean> };
-      if (!config.external?.[provider]) throw new Error(`${provider === "github" ? "GitHub" : "Google"} sign-in is not enabled in Supabase yet.`);
+      if (!config.external?.google) throw new Error("Google sign-in is not enabled yet.");
       const { data, error } = await supabaseBrowser().auth.signInWithOAuth({
-        provider,
+        provider: "google",
         options: { redirectTo: accountCallback(), skipBrowserRedirect: true },
       });
       if (error) throw error;
@@ -143,7 +145,7 @@ export function WelcomeScreen() {
           className="cs-button cs-button--glass"
           type="button"
           disabled={busy}
-          onClick={() => void provider("google")}
+          onClick={() => void signInWithGoogle()}
         >
           Continue with Google
         </button>
@@ -204,6 +206,7 @@ export function WelcomeScreen() {
               <label htmlFor="account-email">Email</label>
               <input
                 autoComplete="email"
+                disabled={busy}
                 id="account-email"
                 name="email"
                 placeholder="jamie@example.com"
@@ -213,6 +216,7 @@ export function WelcomeScreen() {
               <label htmlFor="account-password">Password</label>
               <input
                 autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                disabled={busy}
                 id="account-password"
                 name="password"
                 placeholder={mode === "signup" ? "Create a password" : "Your password"}
@@ -221,31 +225,7 @@ export function WelcomeScreen() {
                 required
                 type="password"
               />
-
-              <p className="account-sheet__or">Or with</p>
-              <div className="account-sheet__providers" aria-label="Other sign-up options">
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => void provider("google")}
-                >
-                  <span className="account-sheet__provider-icon account-sheet__provider-icon--google">
-                    G
-                  </span>
-                  Google
-                </button>
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => void provider("github")}
-                >
-                  GitHub
-                </button>
-              </div>
-
-              <p className="account-sheet__terms">
-                By continuing, I agree to the terms and conditions.
-              </p>
+              {mode === "signin" && <Link className="care-text-button account-sheet__forgot" href="/account">Forgot your password?</Link>}
               <button
                 className="cs-button cs-button--primary account-sheet__submit"
                 type="submit"
@@ -253,8 +233,20 @@ export function WelcomeScreen() {
               >
                 {busy ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}
               </button>
-              <button className="care-text-button" type="button" disabled={busy} onClick={() => { setMode(mode === "signup" ? "signin" : "signup"); setAuthError(""); setNotice(""); }}>{mode === "signup" ? "Already have an account? Sign in" : "New to CareSignal? Create an account"}</button>
-              {mode === "signin" && <Link className="care-text-button" href="/account">Forgot your password?</Link>}
+              <p className="account-sheet__or">or</p>
+              <div className="account-sheet__providers" aria-label="Other sign-in options">
+                <button type="button" disabled={busy} onClick={() => void signInWithGoogle()}>
+                  <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.39-.18-2.05H12v3.88h5.38a4.6 4.6 0 0 1-2 3.02v2.51h3.24c1.9-1.75 2.98-4.33 2.98-7.36Z" />
+                    <path fill="#34A853" d="M12 22c2.7 0 4.96-.9 6.62-2.41l-3.24-2.51c-.9.6-2.05.96-3.38.96-2.61 0-4.82-1.76-5.61-4.12H3.04v2.59A10 10 0 0 0 12 22Z" />
+                    <path fill="#FBBC05" d="M6.39 13.92A6 6 0 0 1 6.08 12c0-.67.11-1.32.31-1.92V7.49H3.04A10 10 0 0 0 2 12c0 1.61.38 3.14 1.04 4.51l3.35-2.59Z" />
+                    <path fill="#EA4335" d="M12 5.96c1.47 0 2.79.5 3.82 1.49l2.87-2.87A9.6 9.6 0 0 0 12 2a10 10 0 0 0-8.96 5.49l3.35 2.59A5.99 5.99 0 0 1 12 5.96Z" />
+                  </svg>
+                  Continue with Google
+                </button>
+              </div>
+              <button className="care-text-button account-sheet__switch" type="button" disabled={busy} onClick={() => { setMode(mode === "signup" ? "signin" : "signup"); setAuthError(""); setNotice(""); }}>{mode === "signup" ? "Already have an account? Sign in" : "New to CareSignal? Create an account"}</button>
+              <p className="account-sheet__terms">By continuing, I agree to the terms and conditions.</p>
             </form>
         </BottomDrawer>
       )}

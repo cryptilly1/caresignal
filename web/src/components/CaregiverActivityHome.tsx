@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { inter, jakarta, StatusBar } from "./OnboardingFlow";
 import { CareHomeFooter, CareHomeHeader } from "./CareHomeChrome";
 import { BottomDrawer } from "./BottomDrawer";
+import { CaregiverLiveWatchers, CaregiverSimulations } from "./CaregiverSimulations";
 import { CARE_SETUP_KEY, caregiverLabel, initials, parseCareSetup, recipientLabel } from "@/lib/care-setup";
 import {
   emptyHomePreview, formatCallDuration, HOME_PREVIEW_KEY, parseHomePreview,
@@ -55,6 +56,7 @@ export function CaregiverActivityHome() {
   const [activity, setActivity] = useState(initial.activity);
   const [message, setMessage] = useState(initial.error);
   const [drawer, setDrawer] = useState<Drawer>(null);
+  const [simulating, setSimulating] = useState(false);
   const [doorOpen, setDoorOpen] = useState(() => ["request", "connected", "visitor"].includes(new URLSearchParams(window.location.search).get("door") ?? ""));
   const [scenario, setScenario] = useState<DoorScenario>(() => new URLSearchParams(window.location.search).get("door") === "visitor" ? "visitor" : "help");
   const [callStarted, setCallStarted] = useState(() => new URLSearchParams(window.location.search).get("door") === "connected" ? Date.now() : null);
@@ -175,12 +177,13 @@ export function CaregiverActivityHome() {
   return (
     <main className={`onboarding-screen care-home caregiver-home ${inter.variable} ${jakarta.variable}`}>
       <StatusBar />
-      <CareHomeHeader initials={initial.setup ? initials(caregiver) : "EA"} onAccount={() => setDrawer("profile")} />
+      <CareHomeHeader initials={initial.setup ? initials(caregiver) : "EA"} onAccount={() => setDrawer("profile")} onSimulate={() => { setDrawer(null); setSimulating(true); }} />
       <div className={`onboarding-body caregiver-home__body${doorOpen && minimized ? " caregiver-home__body--call" : ""}`}>
         <header className="caregiver-home__greeting">
           <p>{date}</p>
           <h1>Hello {greeting}.<br />It’s good to have you here.</h1>
         </header>
+        <CaregiverSimulations open={simulating} onClose={() => setSimulating(false)} />
         <section aria-label="Duty and household overview" className="home-overview">
           <div className="home-duty home-glass">
             <div><div className="home-duty__heading"><span>On Duty</span><Link href="/onboarding?step=5">Manage</Link></div><strong>You ·</strong><span>{initial.setup?.dutyShift ?? "10:00 AM until 6:00 PM"}</span></div>
@@ -233,6 +236,7 @@ export function CaregiverActivityHome() {
           </section>
         </div>
       </div>
+      <CaregiverLiveWatchers />
       <CareHomeFooter />
       {doorOpen && minimized && (
         <button className="door-help-mini home-glass" onClick={() => setMinimized(false)} ref={miniRef} type="button">

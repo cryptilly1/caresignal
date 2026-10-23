@@ -36,7 +36,7 @@ type SyncPayload = {
  * - Instant buttons: Ring-shaped events right now (demo / DoorSense path)
  * - Fast history poll (~2s): catches Playground Package/Motion sims (no webhooks there)
  */
-export function RingBridge() {
+export function RingBridge({ headless = false }: { headless?: boolean } = {}) {
   const { ingestRingApiEvent } = useStore();
   const [status, setStatus] = useState<StatusPayload | null>(null);
   const [busy, setBusy] = useState(false);
@@ -183,21 +183,24 @@ export function RingBridge() {
   );
 
   useEffect(() => {
-    void refreshStatus();
+    const timer = window.setTimeout(() => void refreshStatus(), 0);
+    return () => window.clearTimeout(timer);
   }, [refreshStatus]);
 
   // Near-instant: poll Ring history every 2s while Today is open
   useEffect(() => {
     if (!status?.configured) return;
-    void sync({ silent: true });
+    const initial = window.setTimeout(() => void sync({ silent: true }), 0);
     const id = window.setInterval(() => {
       void sync({ silent: true });
     }, 2000);
-    return () => window.clearInterval(id);
+    return () => { window.clearTimeout(initial); window.clearInterval(id); };
   }, [status?.configured, sync]);
 
   const configured = Boolean(status?.configured);
   const deviceName = status?.device?.name ?? "—";
+
+  if (headless) return null;
 
   return (
     <div className="rounded-[1.15rem] bg-black/25 border border-white/10 p-3 space-y-2">

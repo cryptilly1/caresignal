@@ -56,7 +56,19 @@ demo and account sign-in before its separate live-household operator controls.
 
 ## Designed onboarding preview
 
+Caregiver Home has a play button beside the profile control. Its simulation
+drawer creates labelled, page-local care alerts, camera-motion events, receiver
+help requests, missed check-ins, and missed visits. Test events can be owned or
+cleared without modifying shared care records, camera settings, or receiver
+requests. They disappear on navigation/reload. Shared alerts appear separately;
+household polling, phone-camera sightings, Ring sync, and live door assist stay
+mounted while the simulation drawer is open. Live feeds still require operational
+access and configured devices; a simulation does not validate a real Ring stream.
+
 The public product website lives at `/`; **Open app** leads to `/welcome`.
+The welcome drawer supports email/password sign-in or sign-up and Google OAuth;
+GitHub is not currently offered. Required fields, provider failures, and account
+errors keep the user in the drawer rather than advancing onboarding.
 Desktop app routes include a Web/Mobile/Tablet viewport switch. Mobile simulates an
 iPhone 16 Pro using a 402 x 874 CSS-pixel iframe inside a device frame, so media
 queries and fixed controls behave as on a phone, without a Dynamic Island overlay.

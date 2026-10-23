@@ -9,6 +9,7 @@ import { useRef, useState, useSyncExternalStore } from "react";
 import { inter, jakarta, StatusBar } from "./OnboardingFlow";
 import { CareHomeFooter, CareHomeHeader } from "./CareHomeChrome";
 import { CaregiverActivityHome } from "./CaregiverActivityHome";
+import { CaregiverLiveWatchers, CaregiverSimulations } from "./CaregiverSimulations";
 import { InvitedMembers } from "./CareSetupSteps";
 import { CARE_SETUP_KEY, caregiverLabel, initials, parseCareSetup, recipientLabel, type CareSetup } from "@/lib/care-setup";
 
@@ -36,6 +37,7 @@ function ReadyCareCircle() {
   });
   const [setup, setSetup] = useState<CareSetup | null>(initial.setup);
   const [message, setMessage] = useState(initial.error);
+  const [simulating, setSimulating] = useState(false);
   const invitationDialog = useRef<HTMLDialogElement>(null);
   const recipient = setup ? recipientLabel(setup) : "";
   const name = setup ? caregiverLabel(setup) : "";
@@ -57,8 +59,9 @@ function ReadyCareCircle() {
   return (
     <main className={`onboarding-screen care-home ${inter.variable} ${jakarta.variable}`}>
       <StatusBar />
-      <CareHomeHeader initials={initials(name)} />
+      <CareHomeHeader initials={initials(name)} onSimulate={() => setSimulating(true)} />
       <div className="onboarding-body care-home__body">
+        <CaregiverSimulations open={simulating} onClose={() => setSimulating(false)} />
         {setup ? (
           <>
             <h1 className="onboarding-role-heading">Welcome {name === "You" ? "back" : name.split(" ")[0]}.<br />Your care circle is ready for its first hello.</h1>
@@ -84,6 +87,7 @@ function ReadyCareCircle() {
         <Link className="care-text-button" href="/care-circle?view=activity">Preview home activity</Link>
         {message && <p className="care-home__message" role="status">{message}</p>}
       </div>
+      <CaregiverLiveWatchers />
       <CareHomeFooter />
       <dialog className="care-dialog" ref={invitationDialog}>
         <div className="care-card__heading"><h2>Connect with {recipient}</h2><button aria-label="Close invitation" className="care-close" onClick={() => invitationDialog.current?.close()} type="button"><X aria-hidden="true" size={18} strokeWidth={2} /></button></div>

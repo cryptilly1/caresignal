@@ -3,14 +3,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import { BrandMark } from "./BrandMark";
+import { Play } from "lucide-react";
 
-export function CareHomeHeader({ initials, onAccount, accountIcon = false, centered = false, back }: {
-  initials: string; onAccount?: () => void; accountIcon?: boolean; centered?: boolean; back?: { href: string; label: string };
+export function CareHomeHeader({ initials, onAccount, onSimulate, accountIcon = false, centered = false, back }: {
+  initials: string; onAccount?: () => void; onSimulate?: () => void; accountIcon?: boolean; centered?: boolean; back?: { href: string; label: string };
 }) {
   return (
     <header className={`onboarding-role-header care-home__header${centered ? " care-home__header--centered" : ""}`}>
       {back && <Link className="welcome-screen__help care-home__back" href={back.href} aria-label={`Back to ${back.label}`}><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="m14 6-6 6 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg></Link>}
       <Link className="onboarding-wordmark" href="/" aria-label="CareSignal welcome"><BrandMark /><span>CareSignal</span></Link>
+      {onSimulate && <button className="welcome-screen__help care-home__simulate" onClick={onSimulate} type="button" aria-label="Open simulations"><Play aria-hidden="true" size={20} /></button>}
       {onAccount
         ? <button className="welcome-screen__help care-home__account" onClick={onAccount} type="button" aria-label={accountIcon ? "Open account information" : "Open profile and home preview options"}>{accountIcon ? <Image alt="" src="/images/caregiver-home/circle.svg" width={22} height={22} /> : initials}</button>
         : <Link className="welcome-screen__help care-home__account" href="/onboarding?step=1" aria-label="Edit your care profile">{initials}</Link>}
