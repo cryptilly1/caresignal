@@ -5927,10 +5927,11 @@ button.care-chip::after,
 }
 
 @media (min-width: 761px) {
-  .onboarding-flow {
-    width: min(960px, calc(100vw - 48px));
-    height: min(932px, calc(100dvh - var(--app-toolbar-height, 0px)));
-    min-height: min(600px, calc(100dvh - var(--app-toolbar-height, 0px)));
+  .onboarding-screen.onboarding-flow {
+    width: 100%;
+    height: calc(100dvh - var(--app-toolbar-height, 0px));
+    min-height: 0;
+    border-radius: 0;
   }
 
   .onboarding-flow > .onboarding-status,
@@ -5948,6 +5949,8 @@ button.care-chip::after,
   }
 
   .onboarding-flow .onboarding-body--roles {
+    width: min(100%, 960px);
+    align-self: center;
     padding: 24px 40px;
   }
 
@@ -5955,6 +5958,7 @@ button.care-chip::after,
     min-height: 0;
     margin-bottom: 24px;
     font-size: 38px;
+    text-align: center;
   }
 
   .onboarding-flow .onboarding-role-heading br {
@@ -5980,22 +5984,36 @@ button.care-chip::after,
   }
 
   .onboarding-flow .onboarding-body--wizard {
+    width: min(100%, 760px);
+    align-self: center;
     gap: 28px;
     padding-inline: 40px;
   }
 
   .onboarding-flow .onboarding-wizard-heading {
     min-height: 0;
+    text-align: center;
+  }
+
+  .onboarding-flow .onboarding-wizard-heading h1 {
+    margin-inline: auto;
   }
 
   .onboarding-flow .onboarding-body--wizard-step-1,
   .onboarding-flow .onboarding-body--wizard-step-2,
   .onboarding-flow .onboarding-body--wizard-step-3,
   .onboarding-flow .receiver-body {
-    display: grid;
-    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-    align-content: start;
-    align-items: start;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .onboarding-flow .onboarding-body--wizard > * {
+    width: 100%;
+  }
+
+  .onboarding-flow .onboarding-role-heading,
+  .onboarding-flow .onboarding-wizard-heading h1 {
+    color: #fff;
   }
 
   .onboarding-flow .onboarding-form-stack,

@@ -73,8 +73,9 @@ Device frames scale to available desktop width without changing the iframe's
 internal viewport; actual phones still render the responsive app directly.
 The shared preview frame name keeps provider sign-in outside both simulators.
 Caregiver and receiver onboarding have wide layouts above 760px: the role picker
-shows both choices together, early forms place the heading beside the fields,
-and later setup keeps its existing multi-card layout. Phone role selection
+shows both choices together, and setup headings and forms sit in a centered
+column over a full-viewport background with white headings. Later setup keeps
+its existing multi-card layout. Phone role selection
 remains a scrollable carousel. The desktop layout hides decorative phone chrome.
 Onboarding actions use the same feathered glass blur as the logged-in navigation;
 content scrolls underneath, with bottom padding keeping the last fields reachable.
@@ -183,6 +184,9 @@ and an optional daily reminder. Use the clearly labelled demo code `CS-7K4M`
 to preview the supplied household, invited by **Elias Aderemi**; arbitrary codes
 never resolve to a household. The code and inviter name appear below the entry
 field and in the invitation review. The receiver's profile is kept separate.
+Signed-in account profile names prefill empty caregiver name fields and replace
+the receiver's untouched example name. Existing custom names remain editable and
+are not overwritten; signing in never fills the caregiver's receiver details.
 This does not enable a live invitation or reminder service, and no code-request
 feature is provided yet.
 Invitation links can open `/onboarding/receiver?code=CS-7K4M`. Checking a code

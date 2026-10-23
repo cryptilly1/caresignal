@@ -6,12 +6,13 @@ import { X } from "lucide-react";
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef, useState, useSyncExternalStore, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent } from "react";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { useRouter } from "next/navigation";
 import { CheckInPlan, DutyPlan, HouseholdReview, InviteMembers } from "./CareSetupSteps";
 import { CARE_SETUP_KEY, emptyCareSetup, parseCareSetup, type CareSetup } from "@/lib/care-setup";
 import { DrawerSelect } from "./BottomDrawer";
+import { signedInAccountName } from "@/lib/account-profile";
 
 export const inter = Inter({
   subsets: ["latin"],
@@ -242,6 +243,20 @@ function OnboardingWizard() {
   const bodyRef = useRef<HTMLDivElement>(null);
   const roleTrackRef = useRef<HTMLDivElement>(null);
   const roleCardRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  useEffect(() => {
+    let active = true;
+    void signedInAccountName().then((name) => {
+      if (!active || !name) return;
+      setCaregiverName((current) => current.trim() ? current : name.fullName);
+      setCaregiverPreferredName((current) => current.trim() ? current : name.preferredName);
+    }).catch(() => {
+      if (!active) return;
+      console.error("Unable to load account name for care setup.");
+      setMessage("Your account name couldn't be loaded. You can enter it below.");
+    });
+    return () => { active = false; };
+  }, []);
+
   const setup: CareSetup = {
     ...settings, caregiverName, caregiverPreferredName, recipientUsername,
     recipientName, recipientPreferredName, relationship, profileIcon, profileColor,

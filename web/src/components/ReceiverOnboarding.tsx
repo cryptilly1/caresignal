@@ -4,13 +4,14 @@ import { Bell, Check, ChevronRight, Home, Settings, ShieldCheck, Unplug, UserRou
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { BottomDrawer } from "./BottomDrawer";
 import { CareHomeHeader } from "./CareHomeChrome";
 import { initials } from "@/lib/care-setup";
 import { StatusBar, inter, jakarta } from "./OnboardingFlow";
 import { BrandMark } from "./BrandMark";
+import { signedInAccountName } from "@/lib/account-profile";
 import {
   DEMO_INVITE_CODE,
   DEMO_INVITER_NAME,
@@ -96,6 +97,22 @@ function ReceiverWizard({ initialView }: { initialView?: "day" }) {
   const bodyRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const codeInputRef = useRef<HTMLInputElement>(null);
+  const nameEdited = useRef(false);
+  useEffect(() => {
+    let active = true;
+    void signedInAccountName().then((name) => {
+      if (!active || !name?.fullName || nameEdited.current) return;
+      setSetup((current) => current.preferredName === emptyReceiverSetup.preferredName
+        ? { ...current, preferredName: name.fullName }
+        : current);
+      setDraftName((current) => current === emptyReceiverSetup.preferredName ? name.fullName : current);
+    }).catch(() => {
+      if (!active) return;
+      console.error("Unable to load account name for receiver setup.");
+      setMessage("Your account name couldn't be loaded. You can edit your name before joining.");
+    });
+    return () => { active = false; };
+  }, []);
   const validCode = normalizeInviteCode(code) === DEMO_INVITE_CODE;
   const stepIndex = ["intro", "code", "review", "joined", "day"].indexOf(step);
   const now = new Date();
@@ -359,10 +376,11 @@ function ReceiverWizard({ initialView }: { initialView?: "day" }) {
         <form className="receiver-edit-form" onSubmit={(event) => {
           event.preventDefault();
           if (!draftName.trim()) return;
+          nameEdited.current = true;
           setSetup({ ...setup, preferredName: draftName.trim() });
           setEditing(false);
         }}>
-          <label className="onboarding-field" htmlFor="receiver-preferred-name">Your name<input autoComplete="name" id="receiver-preferred-name" maxLength={80} onChange={(event) => setDraftName(event.target.value)} required value={draftName} /></label>
+          <label className="onboarding-field" htmlFor="receiver-preferred-name">Your name<input autoComplete="name" id="receiver-preferred-name" maxLength={80} onChange={(event) => { nameEdited.current = true; setDraftName(event.target.value); }} required value={draftName} /></label>
           <p className="care-muted">Choose how your name appears. This doesn’t change who sent the invitation.</p>
           <button className="cs-button cs-button--primary care-inline-button" disabled={!draftName.trim()} type="submit">Save changes</button>
         </form>
