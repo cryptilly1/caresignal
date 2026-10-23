@@ -100,6 +100,11 @@ the call, stop the microphone, or remount the media elements. Video can expand
 within the panel and return to its regular size. Escape restores expanded video
 first, then minimizes the panel. Only explicit Leave/Cancel or connection cleanup
 ends the connection; the preview flow remains separately labelled.
+The expanded view keeps connection status, errors, mute, and leave controls
+available, and fits the complete camera frame. The compact restore bar includes
+a microphone toggle. Sticky panel controls stay reachable when content scrolls;
+the panel is mounted above page content so navigation cannot cover its controls.
+Video captions identify the receiver-shared view without claiming a Ring source.
 
 The public product website lives at `/`; **Open app** leads to `/welcome`.
 The welcome drawer supports email/password sign-in or sign-up and Google OAuth;

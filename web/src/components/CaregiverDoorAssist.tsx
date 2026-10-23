@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ArrowUpRight, DoorOpen, Maximize2, MessageCircle, Mic, MicOff, Minimize2, Minus, PhoneOff, Video, X } from "lucide-react";
 import { DOOR_LIVE_ICE } from "@/lib/webrtc-ice";
 import type { SignalPayload } from "@/lib/door-live-server";
@@ -31,6 +32,8 @@ export function CaregiverDoorAssist({ hideIdle = false }: { hideIdle?: boolean }
   const [elapsed, setElapsed] = useState(0);
   const [minimizedRequest, setMinimizedRequest] = useState<string | null>(null);
   const [expandedRequest, setExpandedRequest] = useState<string | null>(null);
+  const [panelHost, setPanelHost] = useState<HTMLElement | null>(null);
+  const anchorRef = useRef<HTMLSpanElement>(null);
   const activeId = active?.id ?? null;
   const minimized = activeId !== null && minimizedRequest === activeId;
   const videoExpanded = activeId !== null && expandedRequest === activeId;
@@ -55,6 +58,10 @@ export function CaregiverDoorAssist({ hideIdle = false }: { hideIdle?: boolean }
     : "On call: You";
 
   useEffect(() => {
+    setPanelHost(anchorRef.current?.closest("main") ?? null);
+  }, []);
+
+  useEffect(() => {
     if (!activeId) return;
     if (minimized) miniRef.current?.focus({ preventScroll: true });
     else panelRef.current?.focus({ preventScroll: true });
@@ -63,6 +70,11 @@ export function CaregiverDoorAssist({ hideIdle = false }: { hideIdle?: boolean }
   function minimize() {
     setExpandedRequest(null);
     setMinimizedRequest(activeId);
+  }
+
+  function toggleMicrophone() {
+    micRef.current?.getAudioTracks().forEach(track => { track.enabled = !micOn; });
+    setMicOn(!micOn);
   }
 
   const stop = useCallback(async () => {
@@ -262,14 +274,16 @@ export function CaregiverDoorAssist({ hideIdle = false }: { hideIdle?: boolean }
     }
   }
 
-  if (!active && hideIdle) return null;
   const duration = `${Math.floor(elapsed / 60)}:${String(elapsed % 60).padStart(2, "0")}`;
-  return <>
-    {active && minimized && <button ref={miniRef} className="live-door-assist-mini home-glass" aria-label="Restore Live door assist" type="button" onClick={() => setMinimizedRequest(null)}>
-      <DoorOpen aria-hidden="true" size={24} />
-      <span><strong>{phase === "connected" ? `Helping ${recipient} · ${duration}` : phase === "connecting" ? `Connecting to ${recipient}` : `${recipient} needs door help`}</strong><small>{error || (phase === "connected" ? micOn ? "Microphone on · Call continues" : "Microphone muted · Call continues" : "Open Live door assist")}</small></span>
-      <Maximize2 aria-hidden="true" size={20} />
-    </button>}
+  const content = !active && hideIdle ? null : <>
+    {active && minimized && <div className="live-door-assist-mini home-glass" role="group" aria-label="Minimized Live door assist">
+      <button ref={miniRef} className="live-door-assist-mini__restore" aria-label="Restore Live door assist" type="button" onClick={() => setMinimizedRequest(null)}>
+        <DoorOpen aria-hidden="true" size={24} />
+        <span><strong>{phase === "connected" ? `Helping ${recipient} · ${duration}` : phase === "connecting" ? `Connecting to ${recipient}` : `${recipient} needs door help`}</strong><small>{error || (phase === "connected" ? micOn ? "Microphone on · Call continues" : "Microphone muted · Call continues" : "Open Live door assist")}</small></span>
+        <Maximize2 aria-hidden="true" size={20} />
+      </button>
+      {phase === "connected" && <button className="live-door-assist-mini__mic" aria-label={micOn ? "Mute microphone" : "Unmute microphone"} aria-pressed={!micOn} type="button" onClick={toggleMicrophone}>{micOn ? <Mic aria-hidden="true" size={20} /> : <MicOff aria-hidden="true" size={20} />}</button>}
+    </div>}
     <section ref={panelRef} tabIndex={-1} hidden={!!active && minimized} className={`care-card live-door-assist simulation-live${active ? " live-door-assist--popup" : ""}${videoExpanded ? " live-door-assist--expanded" : ""}`} aria-label="Live door assist" onKeyDown={event => {
       if (event.key !== "Escape" || !active) return;
       event.stopPropagation();
@@ -297,21 +311,21 @@ export function CaregiverDoorAssist({ hideIdle = false }: { hideIdle?: boolean }
       }} />
       {phase === "connected" && videoReady && <span className="door-camera-preview__badge">Live · Shared door view</span>}
       {phase === "connecting" && <div className="door-camera-preview__empty">Connecting to the shared camera...</div>}
+      {phase === "connected" && !videoReady && <div className="door-camera-preview__empty">Call connected. Waiting for the shared camera...</div>}
+      {phase === "connected" && videoReady && <div className="live-door-assist__caption"><strong>{recipient}&apos;s door view</strong><span>Shared by {recipient} · Live Assist</span></div>}
     </div>
     <audio ref={bellAudioRef} autoPlay playsInline hidden />
     <div className="live-door-assist__voice"><MessageCircle aria-hidden="true" size={24} /><div><strong>{phase === "connected" ? micOn ? "Your microphone is on" : "Your microphone is muted" : "“Can you help me with this visitor?”"}</strong><p>{phase === "connected" ? micOn ? `Voice goes to ${recipient}${bellLinked ? " and the connected visitor speaker" : "; visitor speaker is not connected"}.` : "No sound is sent from your microphone." : "You haven’t joined yet. Your mic is off."}</p></div></div>
-    {error && <p className="settings-error" role="status">{error}</p>}
+    {error && <p className="settings-error live-door-assist__error" role="status">{error}</p>}
+    <Link className="live-door-assist__alert" href={linkedAlert ? `/alerts/${linkedAlert.id}` : "/escalation"}><span><strong>Open door-help alert</strong><small>{linkedAlert?.title ?? active?.label ?? "Care alerts stay open until cleared"}</small></span><ArrowUpRight aria-hidden="true" size={19} /></Link>
+    <p className="settings-note">Joining requests microphone access. Leaving stops your microphone, not the phone camera or the care alert. A visitor hears you only when their doorbell speaker is connected.</p>
     <div className="live-door-assist__actions">
       {phase === "waiting" ? <button className="cs-button cs-button--primary" disabled={!active} type="button" onClick={() => void join()}><Video aria-hidden="true" size={20} />{ownedByOther ? "Join call" : "Join & take ownership"}</button> : <>
-        {phase === "connected" && <button className="cs-button cs-button--primary" aria-pressed={!micOn} type="button" onClick={() => {
-          micRef.current?.getAudioTracks().forEach(track => { track.enabled = !micOn; });
-          setMicOn(!micOn);
-        }}>{micOn ? <Mic aria-hidden="true" size={20} /> : <MicOff aria-hidden="true" size={20} />}{micOn ? "Mute" : "Unmute"}</button>}
+        {phase === "connected" && <button className="cs-button cs-button--primary" aria-pressed={!micOn} type="button" onClick={toggleMicrophone}>{micOn ? <Mic aria-hidden="true" size={20} /> : <MicOff aria-hidden="true" size={20} />}{micOn ? "Mute" : "Unmute"}</button>}
         <button className="cs-button cs-button--glass door-call-end" type="button" onClick={() => void stop().catch(cause => setError(cause.message))}><PhoneOff aria-hidden="true" size={20} />{phase === "connecting" ? "Cancel connection" : "Leave call"}</button>
       </>}
     </div>
-    <Link className="live-door-assist__alert" href={linkedAlert ? `/alerts/${linkedAlert.id}` : "/escalation"}><span><strong>Open door-help alert</strong><small>{linkedAlert?.title ?? active?.label ?? "Care alerts stay open until cleared"}</small></span><ArrowUpRight aria-hidden="true" size={19} /></Link>
-    <p className="settings-note">Joining requests microphone access. Leaving stops your microphone, not the phone camera or the care alert. A visitor hears you only when their doorbell speaker is connected.</p>
   </section>
   </>;
+  return <><span hidden ref={anchorRef} />{active && panelHost ? createPortal(content, panelHost) : content}</>;
 }
